@@ -1,0 +1,15 @@
+Evaluation on test set
+======================================================================
+Accuracy:  85.14%
+Precision: 85.12%
+Recall:    85.14%
+F1 Score:  85.13%
+
+                     precision    recall  f1-score   support
+
+              smoke     0.8744    0.8784    0.8764       222
+neitherFireNorSmoke     0.8163    0.8108    0.8136       148
+
+           accuracy                         0.8514       370
+          macro avg     0.8454    0.8446    0.8450       370
+       weighted avg     0.8512    0.8514    0.8513       370

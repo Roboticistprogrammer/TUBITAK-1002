@@ -1,0 +1,6 @@
+Test Loss: 0.5271
+Test Accuracy: 85.14%
+
+Per-class Accuracy:
+  smoke: 87.84%
+  neitherFireNorSmoke: 81.08%
