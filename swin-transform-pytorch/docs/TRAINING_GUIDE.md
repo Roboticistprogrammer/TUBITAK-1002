@@ -210,22 +210,6 @@ Metrics to watch:
 - **Learning Rate**: Should follow warmup then decay schedule
 - **Per-class Accuracy**: Check for class imbalance issues
 
-### Console Output
-```
-Epoch 50/100 [Train]: 100%|████| 69/69 [01:45<00:00]
-loss: 0.2341, acc: 91.23%, lr: 0.000087
-
-[Epoch 50] Results:
-  Train - Loss: 0.2341, Acc: 91.23%
-  Val   - Loss: 0.2891, Acc: 89.45%
-  Per-class accuracy:
-    fire: 92.34%
-    smoke: 88.12%
-    neitherFireNorSmoke: 87.89%
-
-✓ New best model! accuracy: 89.45%
-```
-
 ## 🎯 Next Steps
 
 1. **Start Training**: `python train.py`

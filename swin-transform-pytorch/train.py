@@ -3,6 +3,9 @@ Training script for FASDD_RS Fire and Smoke Detection using Swin Transformer
 """
 
 import os
+# ============== CUDNN Optimizations ==============
+os.environ["TORCH_CUDNN_V8_API_ENABLED"] = "1"  # Enable cuDNN v8 API on Windows
+
 import sys
 import time
 import random
@@ -14,7 +17,9 @@ from collections import defaultdict
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.backends.cudnn as cudnn
 from torch.cuda.amp import autocast, GradScaler
+from torch.utils.data import ConcatDataset
 from torch.utils.tensorboard import SummaryWriter
 
 # Add parent directory to path
@@ -22,7 +27,10 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from config import Config
 from swin_transformer_pytorch.models.swin_transformer import SwinTransformer
-from swin_transformer_pytorch.data_utils import create_dataloaders, FASSDDataset
+from swin_transformer_pytorch.data_utils import (
+    create_dataloaders,
+    create_multi_source_dataloaders
+)
 
 
 def set_seed(seed):
@@ -167,8 +175,20 @@ def compute_class_weights(dataset, config):
     """Compute class weights for imbalanced dataset"""
     print("\nComputing class weights...")
     class_counts = defaultdict(int)
-    
-    for sample in dataset.samples:
+
+    def _iter_samples(ds):
+        if isinstance(ds, ConcatDataset):
+            for sub_ds in ds.datasets:
+                yield from _iter_samples(sub_ds)
+        elif hasattr(ds, 'samples'):
+            for sample in ds.samples:
+                yield sample
+        else:
+            raise AttributeError(
+                "Dataset must expose a 'samples' attribute to compute class weights."
+            )
+
+    for sample in _iter_samples(dataset):
         label = sample.get('image_label', 'neitherFireNorSmoke')
         class_counts[label] += 1
     
@@ -374,6 +394,14 @@ def main():
     # Device
     device = torch.device(config.DEVICE if torch.cuda.is_available() else 'cpu')
     print(f"\nUsing device: {device}")
+    
+    # ============== CUDNN Setup ==============
+    if config.USE_CUDNN_BENCHMARK and device.type == 'cuda':
+        cudnn.benchmark = True
+        cudnn.enabled = True
+        print(f"CUDNN Enabled: {cudnn.enabled}")
+        print(f"CUDNN Benchmark: {cudnn.benchmark}")
+    
     if device.type == 'cuda':
         print(f"GPU: {torch.cuda.get_device_name(0)}")
         print(f"GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
@@ -383,21 +411,43 @@ def main():
     print("LOADING DATASET")
     print("="*70)
     
-    train_loader, val_loader, test_loader = create_dataloaders(
-        root_dir=config.DATASET_ROOT,
-        batch_size=config.BATCH_SIZE,
-        num_workers=config.NUM_WORKERS,
-        img_size=config.IMG_SIZE,
-        annotation_format=config.ANNOTATION_FORMAT,
-        task=config.TASK,
-        pin_memory=config.PIN_MEMORY,
-        cache_images=config.CACHE_IMAGES
-    )
+    if config.USE_MULTI_DATASETS:
+        (train_loader,
+         val_loader,
+         test_loader,
+         per_dataset_test_loaders) = create_multi_source_dataloaders(
+            dataset_sources=config.DATASET_SOURCES,
+            train_sources=config.TRAIN_DATASETS,
+            val_sources=config.VAL_DATASETS,
+            test_sources=config.TEST_DATASETS,
+            batch_size=config.BATCH_SIZE,
+            num_workers=config.NUM_WORKERS,
+            img_size=config.IMG_SIZE,
+            annotation_format=config.ANNOTATION_FORMAT,
+            task=config.TASK,
+            pin_memory=config.PIN_MEMORY,
+            cache_images=config.CACHE_IMAGES
+        )
+    else:
+        train_loader, val_loader, test_loader = create_dataloaders(
+            root_dir=config.DATASET_ROOT,
+            batch_size=config.BATCH_SIZE,
+            num_workers=config.NUM_WORKERS,
+            img_size=config.IMG_SIZE,
+            annotation_format=config.ANNOTATION_FORMAT,
+            task=config.TASK,
+            pin_memory=config.PIN_MEMORY,
+            cache_images=config.CACHE_IMAGES
+        )
+        per_dataset_test_loaders = {}
     
     print(f"\nDataset loaded successfully!")
     print(f"  Train batches: {len(train_loader)}")
     print(f"  Val batches: {len(val_loader)}")
-    print(f"  Test batches: {len(test_loader)}")
+    print(f"  Combined test batches: {len(test_loader)}")
+    if per_dataset_test_loaders:
+        for name, loader in per_dataset_test_loaders.items():
+            print(f"    - {name}: {len(loader)} batches")
     
     # Create model
     print("\n" + "="*70)
@@ -420,13 +470,7 @@ def main():
     
     # Loss function
     if config.USE_CLASS_WEIGHTS:
-        train_dataset = FASSDDataset(
-            root_dir=config.DATASET_ROOT,
-            split='train',
-            annotation_format=config.ANNOTATION_FORMAT,
-            task=config.TASK
-        )
-        class_weights = compute_class_weights(train_dataset, config)
+        class_weights = compute_class_weights(train_loader.dataset, config)
         class_weights = class_weights.to(device)
     else:
         class_weights = None
@@ -557,25 +601,40 @@ def main():
         model.load_state_dict(checkpoint['model_state_dict'])
         print(f"Loaded best model from epoch {checkpoint['epoch']}")
     
+    combined_label = getattr(config, 'COMBINED_TEST_NAME', 'Combined') if config.USE_MULTI_DATASETS else 'Test'
+    test_results = []
     test_loss, test_acc, test_class_accs, (predictions, labels) = validate(
         model, test_loader, criterion, device, config, epoch
     )
+    test_results.append((combined_label, test_loss, test_acc, test_class_accs))
+
+    if per_dataset_test_loaders:
+        for dataset_name in config.TEST_DATASETS:
+            loader = per_dataset_test_loaders.get(dataset_name)
+            if loader is None:
+                continue
+            ds_loss, ds_acc, ds_class_accs, _ = validate(
+                model, loader, criterion, device, config, epoch
+            )
+            test_results.append((dataset_name, ds_loss, ds_acc, ds_class_accs))
     
     print(f"\n[Test Results]")
-    print(f"  Loss: {test_loss:.4f}")
-    print(f"  Accuracy: {test_acc:.2f}%")
-    print(f"  Per-class accuracy:")
-    for class_name, acc in test_class_accs.items():
-        print(f"    {class_name}: {acc:.2f}%")
+    for name, loss, acc, class_accs in test_results:
+        print(f"  {name} -> Loss: {loss:.4f}, Accuracy: {acc:.2f}%")
+        print(f"    Per-class accuracy:")
+        for class_name, class_acc in class_accs.items():
+            print(f"      {class_name}: {class_acc:.2f}%")
     
     # Save results
     results_file = config.RESULTS_DIR / 'test_results.txt'
     with open(results_file, 'w') as f:
-        f.write(f"Test Loss: {test_loss:.4f}\n")
-        f.write(f"Test Accuracy: {test_acc:.2f}%\n\n")
-        f.write("Per-class Accuracy:\n")
-        for class_name, acc in test_class_accs.items():
-            f.write(f"  {class_name}: {acc:.2f}%\n")
+        for name, loss, acc, class_accs in test_results:
+            f.write(f"{name} Loss: {loss:.4f}\n")
+            f.write(f"{name} Accuracy: {acc:.2f}%\n")
+            f.write("Per-class Accuracy:\n")
+            for class_name, class_acc in class_accs.items():
+                f.write(f"  {class_name}: {class_acc:.2f}%\n")
+            f.write("\n")
     
     print(f"\nResults saved to: {results_file}")
     

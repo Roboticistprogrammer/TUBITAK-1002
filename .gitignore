@@ -34,6 +34,7 @@ logs/
 venv/
 ENV/
 env/
+Thesis/
 
 # IDEs
 .vscode/
@@ -49,6 +50,7 @@ Thumbs.db
 Dataset/
 *.tif
 *.tiff
+datasets/
 
 # Temporary files
 *.log

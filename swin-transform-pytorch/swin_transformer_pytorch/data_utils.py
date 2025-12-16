@@ -11,7 +11,7 @@ from typing import Dict, List, Tuple, Optional, Union, Callable
 from collections import defaultdict
 
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, ConcatDataset
 from torchvision import transforms
 from PIL import Image
 import numpy as np
@@ -84,7 +84,20 @@ class FASSDDataset(Dataset):
     
     def _load_coco_annotations(self) -> List[Dict]:
         """Load COCO format annotations"""
-        json_file = self.annotation_dir / 'COCO_RS_RGB' / 'Annotations' / f'{self.split}.json'
+        # Detect the correct COCO subfolder (COCO_RS_RGB, COCO_CV, COCO_UAV, etc.)
+        coco_subdirs = list(self.annotation_dir.glob('COCO_*'))
+        if not coco_subdirs:
+            raise FileNotFoundError(f"No COCO annotation directory found in {self.annotation_dir}")
+        coco_dir = coco_subdirs[0]
+        
+        # Check for Annotations subfolder or direct JSON files
+        if (coco_dir / 'Annotations').exists():
+            json_file = coco_dir / 'Annotations' / f'{self.split}.json'
+        else:
+            json_file = coco_dir / f'{self.split}.json'
+        
+        if not json_file.exists():
+            raise FileNotFoundError(f"COCO annotation file not found: {json_file}")
         
         with open(json_file, 'r') as f:
             coco_data = json.load(f)
@@ -149,8 +162,21 @@ class FASSDDataset(Dataset):
     
     def _load_voc_annotations(self) -> List[Dict]:
         """Load VOC format annotations"""
-        voc_dir = self.annotation_dir / 'VOC_RS_RGB' / 'Annotations'
-        yolo_file = self.annotation_dir / 'YOLO_RS_RGB' / f'{self.split}.txt'
+        # Detect the correct VOC and YOLO subdirectories
+        voc_subdirs = list(self.annotation_dir.glob('VOC_*'))
+        yolo_subdirs = list(self.annotation_dir.glob('YOLO_*'))
+        
+        if not voc_subdirs:
+            raise FileNotFoundError(f"No VOC annotation directory found in {self.annotation_dir}")
+        if not yolo_subdirs:
+            raise FileNotFoundError(f"No YOLO annotation directory found in {self.annotation_dir}")
+        
+        voc_base = voc_subdirs[0]
+        yolo_base = yolo_subdirs[0]
+        
+        # Check for Annotations subfolder
+        voc_dir = voc_base / 'Annotations' if (voc_base / 'Annotations').exists() else voc_base
+        yolo_file = yolo_base / f'{self.split}.txt'
         
         # Read image list from YOLO split file
         with open(yolo_file, 'r') as f:
@@ -506,6 +532,100 @@ def create_dataloaders(
     )
     
     return train_loader, val_loader, test_loader
+
+
+def create_multi_source_dataloaders(
+    dataset_sources: Dict[str, Dict],
+    train_sources: List[str],
+    val_sources: List[str],
+    test_sources: List[str],
+    batch_size: int = 32,
+    num_workers: int = 4,
+    img_size: int = 224,
+    annotation_format: str = 'coco',
+    task: str = 'classification',
+    pin_memory: bool = True,
+    cache_images: bool = False
+) -> Tuple[DataLoader, DataLoader, DataLoader, Dict[str, DataLoader]]:
+    """Create dataloaders by combining multiple dataset sources."""
+
+    if not dataset_sources:
+        raise ValueError("dataset_sources cannot be empty when using multi-source loading.")
+
+    def _get_spec(name: str) -> Dict:
+        if name not in dataset_sources:
+            raise KeyError(f"Dataset source '{name}' is not defined in dataset_sources.")
+        spec = dataset_sources[name]
+        if 'root' not in spec:
+            raise KeyError(f"Dataset source '{name}' must define a 'root' path.")
+        return spec
+
+    active_names = set(train_sources + val_sources + test_sources)
+    active_tasks = { _get_spec(name).get('task', task) for name in active_names }
+    if len(active_tasks) > 1:
+        raise ValueError("All dataset sources must share the same task type for multi-source loading.")
+    active_task = active_tasks.pop() if active_tasks else task
+    collate_fn = collate_fn_detection if active_task == 'detection' else None
+
+    def _build_dataset(name: str, split: str) -> FASSDDataset:
+        spec = _get_spec(name)
+        fmt = spec.get('annotation_format', annotation_format)
+        ds_task = spec.get('task', active_task)
+        ds_cache = spec.get('cache_images', cache_images)
+        return FASSDDataset(
+            root_dir=str(spec['root']),
+            split=split,
+            annotation_format=fmt,
+            transform=get_transforms(split, img_size, ds_task),
+            task=ds_task,
+            cache_images=ds_cache
+        )
+
+    def _build_pairs(source_names: List[str], split: str) -> List[Tuple[str, FASSDDataset]]:
+        return [(name, _build_dataset(name, split)) for name in source_names]
+
+    def _make_loader(pairs: List[Tuple[str, FASSDDataset]], split: str, shuffle: bool) -> DataLoader:
+        datasets = [ds for _, ds in pairs]
+        if not datasets:
+            raise ValueError(f"No datasets found for split '{split}'.")
+        combined_dataset = datasets[0] if len(datasets) == 1 else ConcatDataset(datasets)
+        drop_last = (split == 'train')
+        return DataLoader(
+            combined_dataset,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+            collate_fn=collate_fn,
+            drop_last=drop_last
+        )
+
+    train_pairs = _build_pairs(train_sources, 'train')
+    val_pairs = _build_pairs(val_sources, 'val')
+    test_pairs = _build_pairs(test_sources, 'test')
+
+    print("\nCombined dataset breakdown:")
+    for split_name, pairs in [('Train', train_pairs), ('Val', val_pairs), ('Test', test_pairs)]:
+        for name, dataset in pairs:
+            print(f"  {split_name} - {name}: {len(dataset)} samples")
+
+    train_loader = _make_loader(train_pairs, 'train', shuffle=True)
+    val_loader = _make_loader(val_pairs, 'val', shuffle=False)
+    combined_test_loader = _make_loader(test_pairs, 'test', shuffle=False)
+
+    per_dataset_tests = {
+        name: DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+            collate_fn=collate_fn
+        )
+        for name, dataset in test_pairs
+    }
+
+    return train_loader, val_loader, combined_test_loader, per_dataset_tests
 
 
 def get_dataset_stats(root_dir: str, annotation_format: str = 'coco'):

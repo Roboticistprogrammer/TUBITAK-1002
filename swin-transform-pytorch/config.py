@@ -11,10 +11,35 @@ class Config:
     
     # ============== Paths ==============
     ROOT_DIR = Path(__file__).parent
-    DATASET_ROOT = "/mnt/storage/Dataset/FASDD_RS"
+    DATASETS_BASE_DIR = ROOT_DIR.parent / "datasets"
+    DATASET_ROOT = DATASETS_BASE_DIR / "FASDD_RS"
     CHECKPOINT_DIR = ROOT_DIR / "checkpoints"
     LOGS_DIR = ROOT_DIR / "logs"
     RESULTS_DIR = ROOT_DIR / "results"
+
+    # Multi-source dataset support
+    USE_MULTI_DATASETS = True
+    DATASET_SOURCES = {
+        'FASDD_RS': {
+            'root': DATASETS_BASE_DIR / 'FASDD_RS',
+            'annotation_format': 'coco',
+            'task': 'classification'
+        },
+        'FASDD_CV': {
+            'root': DATASETS_BASE_DIR / 'FASDD_CV' / 'FASDD_CV',
+            'annotation_format': 'coco',
+            'task': 'classification'
+        },
+        'FASDD_UAV': {
+            'root': DATASETS_BASE_DIR / 'FASDD_UAV',
+            'annotation_format': 'coco',
+            'task': 'classification'
+        }
+    }
+    TRAIN_DATASETS = ['FASDD_RS', 'FASDD_CV', 'FASDD_UAV']
+    VAL_DATASETS = ['FASDD_RS', 'FASDD_CV', 'FASDD_UAV']
+    TEST_DATASETS = ['FASDD_RS', 'FASDD_CV', 'FASDD_UAV']
+    COMBINED_TEST_NAME = 'Combined'
     
     # ============== Dataset ==============
     ANNOTATION_FORMAT = 'coco'  # 'coco', 'voc', or 'yolo'
@@ -24,7 +49,7 @@ class Config:
     
     # ============== Data Loading ==============
     BATCH_SIZE = 16
-    NUM_WORKERS = 4
+    NUM_WORKERS = 8
     PIN_MEMORY = True
     CACHE_IMAGES = False  # Set to True if you have enough RAM
     IMG_SIZE = 224  # 224, 384, or 512
@@ -108,6 +133,7 @@ class Config:
     
     # ============== Device ==============
     DEVICE = 'cuda'  # 'cuda' or 'cpu'
+    USE_CUDNN_BENCHMARK = True  # Auto-tune CUDNN kernels for faster training
     
     # ============== Seed ==============
     SEED = 42
@@ -149,6 +175,11 @@ class Config:
         print(f"  Number of Classes: {cls.NUM_CLASSES}")
         print(f"  Annotation Format: {cls.ANNOTATION_FORMAT}")
         print(f"  Image Size: {cls.IMG_SIZE}")
+        if cls.USE_MULTI_DATASETS:
+            print(f"  Using Combined Sources: {', '.join(cls.TRAIN_DATASETS)}")
+            for name, spec in cls.DATASET_SOURCES.items():
+                root = Path(spec['root'])
+                print(f"    - {name}: {root}")
         
         print("\n[MODEL]")
         print(f"  Variant: {cls.MODEL_VARIANT}")
