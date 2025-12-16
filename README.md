@@ -1,4 +1,4 @@
-# Swin Transformer (Tiny) - Fire & Smoke Detection
+# Swin Transformer (Small) - Fire & Smoke Detection
 
 Training pipeline for fire and smoke detection using Swin Transformer architecture on the FASDD_RS dataset.
 
@@ -19,7 +19,7 @@ net = SwinTransformer(
 )
 ```
 
-**Model Type**: Swin-T (Tiny) - ~28M parameters
+**Model Type**: Swin-S (Small) - ~50M parameters
 - Input: (B, 3, 224, 224)
 - Output: (B, 3) logits
 

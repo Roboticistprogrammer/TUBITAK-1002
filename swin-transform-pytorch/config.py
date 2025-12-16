@@ -56,12 +56,12 @@ class Config:
     
     # ============== Model Architecture ==============
     # Swin Transformer variants: 'tiny', 'small', 'base', 'large', or 'custom'
-    MODEL_VARIANT = 'tiny'
+    MODEL_VARIANT = 'small'
     
     # Swin-T (Tiny) configuration
-    HIDDEN_DIM = 96
-    LAYERS = (2, 2, 6, 2)
-    HEADS = (3, 6, 12, 24)
+    # HIDDEN_DIM = 96
+    # LAYERS = (2, 2, 6, 2)
+    # HEADS = (3, 6, 12, 24)
     HEAD_DIM = 32
     WINDOW_SIZE = 7
     DOWNSCALING_FACTORS = (4, 2, 2, 2)
@@ -71,9 +71,9 @@ class Config:
     # For other variants, uncomment the desired configuration:
     
     # # Swin-S (Small)
-    # HIDDEN_DIM = 96
-    # LAYERS = (2, 2, 18, 2)
-    # HEADS = (3, 6, 12, 24)
+    HIDDEN_DIM = 96
+    LAYERS = (2, 2, 18, 2)
+    HEADS = (3, 6, 12, 24)
     
     # # Swin-B (Base)
     # HIDDEN_DIM = 128
