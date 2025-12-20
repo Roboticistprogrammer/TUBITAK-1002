@@ -1,244 +1,137 @@
-# Swin Transformer (Small) - Fire & Smoke Detection
+# Swin Transformer for Fire and Smoke Detection
 
-Training pipeline for fire and smoke detection using Swin Transformer architecture on the FASDD_RS dataset.
+This repository contains a PyTorch implementation of Swin Transformer for fire and smoke detection on the FASDD (Fire and Smoke Detection Dataset) family of datasets.
 
-## 🎯 Current Model Configuration
+## 🔥 Current Branch: Swin-B (Base) Architecture
 
-### Architecture Parameters
-```python
-net = SwinTransformer(
-    hidden_dim=96,           # Base channel dimension
-    layers=(2, 2, 6, 2),     # Blocks per stage
-    heads=(3, 6, 12, 24),    # Attention heads per stage
-    channels=3,              # Input channels (RGB)
-    num_classes=3,           # [fire, smoke, neitherFireNorSmoke]
-    head_dim=32,             # Dimension per attention head
-    window_size=7,           # Local attention window size
-    downscaling_factors=(4, 2, 2, 2),  # Spatial reduction per stage
-    relative_pos_embedding=True  # Relative positional embeddings
-)
-```
+This branch is configured to train using the **Swin Transformer Base** architecture with the following specifications:
 
-**Model Type**: Swin-S (Small) - ~50M parameters
-- Input: (B, 3, 224, 224)
-- Output: (B, 3) logits
+- **Model Variant**: Swin-B (Base)
+- **Hidden Dimension**: 128
+- **Layers**: (2, 2, 18, 2)
+- **Attention Heads**: (4, 8, 16, 32)
+- **Window Size**: 7
+- **Input Image Size**: 224x224
+- **Parameters**: ~88M
 
-### Training Hyperparameters
-```python
-# Data
-BATCH_SIZE = 16
-IMG_SIZE = 224
-NUM_WORKERS = 8
-CACHE_IMAGES = False
+## 📊 Datasets
 
-# Optimization
-EPOCHS = 100
-LEARNING_RATE = 1e-4
-WEIGHT_DECAY = 0.05
-OPTIMIZER = 'adamw'
-
-# Scheduling
-SCHEDULER = 'cosine'
-WARMUP_EPOCHS = 5
-MIN_LR = 1e-6
-
-# Regularization
-LABEL_SMOOTHING = 0.1
-GRADIENT_CLIP = 1.0
-DROPOUT = 0.0
-
-# Strategy
-MIXED_PRECISION = True
-EARLY_STOPPING_PATIENCE = 15
-```
-
-### Dataset Configuration
-```python
-# Multi-source training
-USE_MULTI_DATASETS = True
-TRAIN_DATASETS = ['FASDD_RS', 'FASDD_CV', 'FASDD_UAV']
-VAL_DATASETS = ['FASDD_RS', 'FASDD_CV', 'FASDD_UAV']
-TEST_DATASETS = ['FASDD_RS', 'FASDD_CV', 'FASDD_UAV']
-
-# Classes
-NUM_CLASSES = 3
-CLASS_NAMES = ['fire', 'smoke', 'neitherFireNorSmoke']
-ANNOTATION_FORMAT = 'coco'
-TASK = 'classification'
-```
+The training pipeline supports multi-dataset training with three FASDD variants:
+- **FASDD_RS**: Remote Sensing dataset
+- **FASDD_CV**: Computer Vision dataset  
+- **FASDD_UAV**: UAV (Unmanned Aerial Vehicle) dataset
 
 ## 🚀 Quick Start
 
-### 1. Training
-```bash
-# Navigate to the project directory first
-cd swin-transform-pytorch
+### Installation
 
-# Train with current config
+```bash
+pip install -r requirements.txt
+```
+
+### Training
+
+```bash
 python train.py
-
-# Custom configuration: Edit config.py first, then:
-python train.py
 ```
 
-### 2. Evaluation
+The configuration is set in [config.py](config.py) with:
+- Batch size: 16
+- Learning rate: 1e-4
+- Epochs: 100
+- Optimizer: AdamW
+- Scheduler: Cosine with warmup
+
+### Evaluation
+
 ```bash
-cd swin-transform-pytorch
-
-# Evaluate on test set
-python evaluate.py --checkpoint checkpoints/best_model.pth --split test --visualize
+python evaluate.py
 ```
 
-### 3. Inference on Single Image
+### Inference
+
 ```bash
-cd swin-transform-pytorch
-
-# Basic inference (prints results to console)
-python inference.py \
-    --checkpoint checkpoints/best_model.pth \
-    --image results/example/fire.jpg
-
-# With visualization
-python inference.py \
-    --checkpoint checkpoints/best_model.pth \
-    --image results/example/fire.jpg \
-    --visualize
-
-# Save visualization to file
-python inference.py \
-    --checkpoint checkpoints/best_model.pth \
-    --image /results/example/fire.jpg \
-    --visualize \
-    --save results/example/prediction.png
-
-# Using CPU instead of GPU
-python inference.py \
-    --checkpoint checkpoints/best_model.pth \
-    --image results/example/fire.jpg \
-    --device cpu \
-    --visualize
+python inference.py --image_path /path/to/image.jpg
 ```
 
-## 📊 Model Variants Quick Reference
-
-| Variant | Hidden Dim | Layers       | Heads        | Parameters | Speed  |
-|---------|-----------|--------------|--------------|-----------|--------|
-| Swin-T  | 96        | (2,2,6,2)    | (3,6,12,24)  | ~28M      | Fast   |
-| Swin-S  | 96        | (2,2,18,2)   | (3,6,12,24)  | ~50M      | Medium |
-| Swin-B  | 128       | (2,2,18,2)   | (4,8,16,32)  | ~88M      | Slow   |
-| Swin-L  | 192       | (2,2,18,2)   | (6,12,24,48) | ~197M     | Slowest|
-
-To use a different variant, edit `swin-transform-pytorch/config.py` and set `MODEL_VARIANT` or uncomment the desired configuration.
-
-## 📝 Parameter Tracking for New Models
-
-When training new models with different parameters, document them here:
-
-### Model Run Template
-```markdown
-#### Run: [Description] - [Date]
-- **Config File**: config.py
-- **Model Type**: Swin-T / Swin-S / Swin-B / Swin-L
-- **Key Parameters**:
-  - Image Size: 224 / 384 / 512
-  - Batch Size: X
-  - Learning Rate: X
-  - Epochs: X
-  - Scheduler: cosine / step / none
-  - Mixed Precision: Yes / No
-  - Label Smoothing: X
-- **Datasets**: FASDD_RS / Combined (RS+CV+UAV)
-- **Results**:
-  - Best Accuracy: X%
-  - Best Loss: X
-  - Checkpoint: checkpoints/best_model_[run_name].pth
-  - Notes: [Any observations]
-```
-
-### Example Run Documentation
-
-#### Run: Baseline - Swin-T on FASDD_RS (2024-11)
-- **Model Type**: Swin-T (28M params)
-- **Key Parameters**:
-  - Image Size: 224
-  - Batch Size: 16
-  - Learning Rate: 1e-4
-  - Epochs: 100
-  - Scheduler: Cosine with warmup (5 epochs)
-  - Mixed Precision: Yes
-  - Label Smoothing: 0.1
-- **Datasets**: Combined (FASDD_RS, FASDD_CV, FASDD_UAV)
-- **Status**: Ready to train
-- **Expected Time**: ~3.3 hours on RTX 3090
-
----
-
-#### Run: [Next experiment] - [Your description]
-- **Model Type**: 
-- **Key Parameters**:
-  - Image Size: 
-  - Batch Size: 
-  - Learning Rate: 
-  - Epochs: 
-  - Scheduler: 
-  - Mixed Precision: 
-  - Label Smoothing: 
-- **Datasets**: 
-- **Status**: [Planned / In Progress / Complete]
-- **Results**: [To be filled after training]
-
----
-
-## 📁 Directory Structure
+## 📁 Project Structure
 
 ```
-e:\Amir_Thesis\TUBITAK-1002\
-├── swin-transform-pytorch/
-│   ├── config.py                    # ← Modify parameters here
-│   ├── train.py                     # Main training script
-│   ├── evaluate.py                  # Evaluation & metrics
-│   ├── inference.py                 # Single image prediction
-│   ├── data_utils.py                # Dataset loading
-│   ├── swin_transformer.py          # Model implementation
-│   ├── checkpoints/                 # Saved models
-│   ├── logs/                        # TensorBoard logs
-│   └── results/                     # Evaluation results
-├── datasets/
-│   ├── FASDD_RS/
-│   ├── FASDD_CV/
-│   └── FASDD_UAV/
-└── README.md                        # This file
+swin-transform-pytorch/
+├── config.py                 # Training configuration (Swin-B settings)
+├── train.py                  # Training script
+├── evaluate.py               # Evaluation script
+├── inference.py              # Inference script
+├── test_datasets.py          # Dataset testing utilities
+├── swin_transformer_pytorch/ # Model implementation
+│   ├── models/
+│   │   └── swin_transformer.py
+│   └── data_utils.py
+├── docs/                     # Documentation
+│   ├── README_TRAINING.md
+│   ├── TRAINING_GUIDE.md
+│   └── COMBINED_DATASET_README.md
+└── results/                  # Training results and metrics
 ```
 
-## 🔧 Modifying Parameters
+## 🎯 Model Architecture Details
 
-1. **Architecture**: Edit `HIDDEN_DIM`, `LAYERS`, `HEADS` in `swin-transform-pytorch/config.py`
-2. **Data**: Edit `IMG_SIZE`, `BATCH_SIZE`, `TRAIN_DATASETS` in `swin-transform-pytorch/config.py`
-3. **Training**: Edit `EPOCHS`, `LEARNING_RATE`, `SCHEDULER` in `swin-transform-pytorch/config.py`
-4. **Regularization**: Edit `LABEL_SMOOTHING`, `WEIGHT_DECAY`, `DROPOUT` in `swin-transform-pytorch/config.py`
+The Swin-B configuration uses:
+- 4 stages with progressive downsampling
+- Window-based self-attention with shifted windows
+- Relative position bias
+- Layer normalization and GELU activation
+- Patch embedding with 4x4 patch size
 
-See [TRAINING_GUIDE.md](swin-transform-pytorch/docs/TRAINING_GUIDE.md) for detailed explanation of each parameter.
+See [config.py](config.py) for full configuration details.
 
-## 🛠️ Terminal Tips
+## 📝 Configuration
 
-### For Bash (Git Bash, WSL, Linux, macOS)
-Use **forward slashes** (`/`):
-```bash
-cd swin-transform-pytorch
-python inference.py --checkpoint checkpoints/best_model.pth --image ../results/example/fire.jpg
-```
+Key configuration parameters in [`Config`](config.py) class:
 
-### For Windows CMD/PowerShell
-Use **backslashes** (`\`) or **forward slashes** (`/`):
-```cmd
-cd swin-transform-pytorch
-python inference.py --checkpoint checkpoints\best_model.pth --image ..\results\example\fire.jpg
-```
+- **Model**: [`MODEL_VARIANT`](config.py) = 'base'
+- **Datasets**: [`USE_MULTI_DATASETS`](config.py) = True
+- **Classes**: 3 (fire, smoke, neitherFireNorSmoke)
+- **Mixed Precision**: Enabled
+- **Early Stopping**: 15 epochs patience
 
-**Tip**: Forward slashes work in ALL terminals (bash, cmd, PowerShell), so always use `/` for cross-platform compatibility!
+To modify settings, edit [config.py](config.py) directly.
 
-## 📚 Resources
+## 📚 Documentation
 
-- [Training Guide](swin-transform-pytorch/docs/TRAINING_GUIDE.md) - Detailed setup, tips, and troubleshooting
-- Original Paper: [Swin Transformer: Hierarchical Vision Transformer using Shifted Windows](https://arxiv.org/abs/2105.01601)
+- [Training Guide](docs/TRAINING_GUIDE.md) - Detailed training instructions
+- [Training README](docs/README_TRAINING.md) - Training configuration details
+- [Combined Dataset README](docs/COMBINED_DATASET_README.md) - Multi-dataset setup
 
+## 🔧 Requirements
+
+- Python 3.8+
+- PyTorch 2.0+
+- CUDA 11.8+ (for GPU training)
+
+See [requirements.txt](requirements.txt) for full dependencies.
+
+## 📈 Results
+
+Training results and metrics are saved to:
+- Checkpoints: `checkpoints/`
+- Logs: `logs/`
+- Results: `results/`
+
+## 🌟 Features
+
+- ✅ Multi-dataset training support
+- ✅ Mixed precision training (AMP)
+- ✅ Cosine learning rate scheduling with warmup
+- ✅ Early stopping
+- ✅ TensorBoard logging
+- ✅ Best model checkpointing
+- ✅ COCO annotation format support
+
+## 📄 License
+
+[Add your license here]
+
+## 🙏 Acknowledgments
+
+Based on the Swin Transformer architecture from Microsoft Research.
