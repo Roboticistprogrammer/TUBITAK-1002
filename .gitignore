@@ -21,9 +21,7 @@ wheels/
 *.egg
 
 # PyTorch
-*.pth
 *.pt
-checkpoints/
 logs/
 #results/
 

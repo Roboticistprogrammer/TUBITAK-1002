@@ -58,7 +58,10 @@ def evaluate_model(model, dataloader, device, config):
     all_probabilities = []
     
     print("\nEvaluating model...")
-    for images, labels in tqdm(dataloader):
+    total_batches = len(dataloader) if hasattr(dataloader, '__len__') else None
+    
+    for batch_idx, batch in enumerate(tqdm(dataloader, total=total_batches)):
+        images, labels = batch
         images = images.to(device)
         labels = labels.to(device)
         
@@ -90,10 +93,21 @@ def compute_metrics(predictions, labels, class_names):
     print("\n" + "="*70)
     print("EVALUATION METRICS")
     print("="*70)
+    print(f"Total Samples: {len(labels)}")
     print(f"Accuracy:  {accuracy*100:.2f}%")
     print(f"Precision: {precision*100:.2f}%")
     print(f"Recall:    {recall*100:.2f}%")
     print(f"F1 Score:  {f1*100:.2f}%")
+    
+    # Dataset composition
+    print("\n" + "="*70)
+    print("DATASET COMPOSITION")
+    print("="*70)
+    unique_labels = np.unique(labels)
+    for label_idx in unique_labels:
+        count = np.sum(labels == label_idx)
+        percentage = (count / len(labels)) * 100
+        print(f"{class_names[label_idx]}: {count} samples ({percentage:.1f}%)")
     
     # Per-class metrics
     print("\n" + "="*70)
@@ -101,11 +115,11 @@ def compute_metrics(predictions, labels, class_names):
     print("="*70)
     
     # Get unique labels present in the data
-    unique_labels = np.unique(np.concatenate([labels, predictions]))
-    target_names_subset = [class_names[i] for i in unique_labels]
+    unique_labels_all = np.unique(np.concatenate([labels, predictions]))
+    target_names_subset = [class_names[i] for i in unique_labels_all]
     
     report = classification_report(labels, predictions, 
-                                   labels=unique_labels,
+                                   labels=unique_labels_all,
                                    target_names=target_names_subset, 
                                    digits=4, 
                                    zero_division=0)
@@ -274,6 +288,9 @@ def main():
                        help='Dataset split to evaluate')
     parser.add_argument('--batch_size', type=int, default=32,
                        help='Batch size for evaluation')
+    parser.add_argument('--datasets', type=str, default='all', 
+                       choices=['all', 'FASDD_RS', 'FASDD_CV', 'FASDD_UAV'],
+                       help='Which dataset(s) to evaluate on')
     parser.add_argument('--visualize', action='store_true',
                        help='Visualize sample predictions')
     parser.add_argument('--save_plots', action='store_true',
@@ -299,22 +316,56 @@ def main():
     
     model, model_config = load_model(checkpoint_path, device)
     
-    # Load dataset
-    print(f"\nLoading {args.split} dataset...")
-    _, val_loader, test_loader = create_dataloaders(
-        root_dir=config.DATASET_ROOT,
-        batch_size=args.batch_size,
-        num_workers=config.NUM_WORKERS,
-        img_size=model_config['IMG_SIZE'],
-        annotation_format=config.ANNOTATION_FORMAT,
-        task=config.TASK,
-        pin_memory=False
-    )
-    
-    if args.split == 'val':
-        dataloader = val_loader
+    # Determine which datasets to use
+    if args.datasets == 'all':
+        dataset_keys = config.TEST_DATASETS
+        dataset_name = 'Combined'
     else:
-        dataloader = test_loader
+        dataset_keys = [args.datasets]
+        dataset_name = args.datasets
+    
+    # Load datasets and create combined dataloader
+    print(f"\nLoading {args.split} dataset(s): {', '.join(dataset_keys)}...")
+    
+    from torch.utils.data import ConcatDataset
+    all_dataloaders = []
+    
+    for dataset_key in dataset_keys:
+        dataset_config = config.DATASET_SOURCES[dataset_key]
+        try:
+            _, val_loader, test_loader = create_dataloaders(
+                root_dir=str(dataset_config['root']),
+                batch_size=args.batch_size,
+                num_workers=config.NUM_WORKERS,
+                img_size=model_config['IMG_SIZE'],
+                annotation_format=dataset_config['annotation_format'],
+                task=dataset_config['task'],
+                pin_memory=False
+            )
+            
+            if args.split == 'val':
+                all_dataloaders.append(val_loader)
+            else:
+                all_dataloaders.append(test_loader)
+                
+            print(f"  ✓ Loaded {dataset_key}")
+        except Exception as e:
+            print(f"  ✗ Failed to load {dataset_key}: {str(e)}")
+            continue
+    
+    # Combine dataloaders if multiple datasets
+    if len(all_dataloaders) > 1:
+        # Create a combined dataloader
+        from itertools import chain
+        dataloader = type('CombinedDataLoader', (), {
+            '__iter__': lambda self: chain.from_iterable(all_dataloaders),
+            '__len__': lambda self: sum(len(dl) for dl in all_dataloaders)
+        })()
+    elif len(all_dataloaders) == 1:
+        dataloader = all_dataloaders[0]
+    else:
+        print("Error: No datasets could be loaded")
+        return
     
     # Evaluate
     predictions, labels, probabilities = evaluate_model(model, dataloader, device, config)
@@ -322,21 +373,36 @@ def main():
     # Compute metrics
     metrics = compute_metrics(predictions, labels, config.CLASS_NAMES)
     
-    # Create results directory
-    results_dir = config.RESULTS_DIR / f'evaluation_{args.split}'
+    # Create results directory with dataset info
+    results_subdir = f'evaluation_{args.split}_{dataset_name}'
+    results_dir = config.RESULTS_DIR / results_subdir
     results_dir.mkdir(parents=True, exist_ok=True)
     
-    # Save results
+    # Save results with dataset information
     save_path = results_dir / 'metrics.txt' if args.save_plots else None
     if save_path:
         with open(save_path, 'w') as f:
-            f.write(f"Evaluation on {args.split} set\n")
             f.write("="*70 + "\n")
+            f.write(f"EVALUATION REPORT\n")
+            f.write("="*70 + "\n")
+            f.write(f"Split: {args.split.upper()}\n")
+            f.write(f"Dataset(s): {', '.join(dataset_keys)}\n")
+            f.write(f"Total Samples: {len(labels)}\n")
+            f.write("="*70 + "\n\n")
             f.write(f"Accuracy:  {metrics['accuracy']*100:.2f}%\n")
             f.write(f"Precision: {metrics['precision']*100:.2f}%\n")
             f.write(f"Recall:    {metrics['recall']*100:.2f}%\n")
             f.write(f"F1 Score:  {metrics['f1']*100:.2f}%\n\n")
             f.write(metrics['report'])
+            
+            # Add class-wise statistics
+            f.write("\n" + "="*70 + "\n")
+            f.write("CLASS-WISE STATISTICS\n")
+            f.write("="*70 + "\n")
+            for class_idx, class_name in enumerate(config.CLASS_NAMES):
+                class_mask = labels == class_idx
+                count = np.sum(class_mask)
+                f.write(f"{class_name}: {count} samples\n")
         print(f"\nMetrics saved to: {save_path}")
     
     # Plot confusion matrix
