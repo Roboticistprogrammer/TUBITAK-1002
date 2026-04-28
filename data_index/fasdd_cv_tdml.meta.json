@@ -1,0 +1,17 @@
+{
+  "tdml_json": "E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\TUBITAK-1002\\datasets\\FASDD_CV\\FASDD_CV\\annotations\\TDML_CV\\FASDD_CV_TDML.json",
+  "images_root": "E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\TUBITAK-1002\\datasets\\FASDD_CV\\FASDD_CV\\images",
+  "classes": [
+    "fire",
+    "smoke",
+    "both",
+    "neither"
+  ],
+  "both_as": "both",
+  "counts": {
+    "train": 47660,
+    "val": 31770,
+    "test": 15884,
+    "missing_images": 0
+  }
+}
