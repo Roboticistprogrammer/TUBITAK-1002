@@ -39,7 +39,6 @@ def build_eval_transform(img_size: int, mean, std):
         ]
     )
 
-
 def main() -> None:
     args = parse_args()
     specs = get_dataset_specs(ROOT)
@@ -49,18 +48,21 @@ def main() -> None:
     if not index_csv.exists():
         raise SystemExit(f"CSV not found: {index_csv}. Run prepare_tdml_classification.py first.")
 
+    checkpoint = torch.load(args.checkpoint, map_location="cpu")
+
+    classes = checkpoint.get("classes", DEFAULT_CLASSES)
+    model_name = checkpoint.get("model_name", DEFAULT_MODEL_NAME)
     model, image_processor = build_swinv2_classifier(
-        num_labels=len(DEFAULT_CLASSES),
-        label2id={name: i for i, name in enumerate(DEFAULT_CLASSES)},
-        id2label={i: name for i, name in enumerate(DEFAULT_CLASSES)},
-        model_name=DEFAULT_MODEL_NAME,
+        num_labels=len(classes),
+        label2id={name: i for i, name in enumerate(classes)},
+        id2label={i: name for i, name in enumerate(classes)},
+        model_name=model_name,
     )
 
-    checkpoint = torch.load(args.checkpoint, map_location="cpu")
     model.load_state_dict(checkpoint["model"])
 
     eval_tf = build_eval_transform(args.img_size, image_processor.image_mean, image_processor.image_std)
-    dataset = ImageClassificationCSVDataset(index_csv, args.split, DEFAULT_CLASSES, transform=eval_tf)
+    dataset = ImageClassificationCSVDataset(index_csv, args.split, classes, transform=eval_tf)
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -81,7 +83,7 @@ def main() -> None:
     print("Confusion matrix:")
     print(confusion_matrix(all_labels, all_preds))
     print("\nClassification report:")
-    print(classification_report(all_labels, all_preds, target_names=DEFAULT_CLASSES))
+    print(classification_report(all_labels, all_preds, target_names=classes))
 
 
 if __name__ == "__main__":

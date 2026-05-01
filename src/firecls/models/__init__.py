@@ -1,1 +1,1 @@
-__all__ = ["swinv2"]
+__all__ = ["swinv2", "teacher", "student"]

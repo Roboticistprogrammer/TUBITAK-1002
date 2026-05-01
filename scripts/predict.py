@@ -11,7 +11,7 @@ from bootstrap import setup_path
 
 setup_path()
 
-from firecls.config import DEFAULT_CLASSES, DEFAULT_IMG_SIZE, DEFAULT_MODEL_NAME
+from firecls.config import DEFAULT_IMG_SIZE
 from firecls.models.swinv2 import build_swinv2_classifier
 
 
@@ -38,14 +38,19 @@ def build_eval_transform(img_size: int, mean, std):
 def main() -> None:
     args = parse_args()
 
+    checkpoint = torch.load(args.checkpoint, map_location="cpu")
+    
+    # Load checkpoint metadata for classes and model name
+    classes = checkpoint.get("classes", ["fire", "smoke", "both", "neither"])
+    model_name = checkpoint.get("model_name", "microsoft/swinv2-large-patch4-window12-192-22k")
+    
     model, image_processor = build_swinv2_classifier(
-        num_labels=len(DEFAULT_CLASSES),
-        label2id={name: i for i, name in enumerate(DEFAULT_CLASSES)},
-        id2label={i: name for i, name in enumerate(DEFAULT_CLASSES)},
-        model_name=DEFAULT_MODEL_NAME,
+        num_labels=len(classes),
+        label2id={name: i for i, name in enumerate(classes)},
+        id2label={i: name for i, name in enumerate(classes)},
+        model_name=model_name,
     )
 
-    checkpoint = torch.load(args.checkpoint, map_location="cpu")
     model.load_state_dict(checkpoint["model"])
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -53,7 +58,13 @@ def main() -> None:
     model.eval()
 
     transform = build_eval_transform(args.img_size, image_processor.image_mean, image_processor.image_std)
-    image = Image.open(args.image).convert("RGB")
+    
+    # Handle image path: add .jpg if not present
+    image_path = Path(args.image)
+    if not image_path.exists() and not image_path.suffix:
+        image_path = Path(str(image_path) + ".jpg")
+    
+    image = Image.open(image_path).convert("RGB")
     image_tensor = transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
@@ -64,7 +75,7 @@ def main() -> None:
     scores, indices = torch.topk(probs, k=topk)
 
     for score, idx in zip(scores.tolist(), indices.tolist()):
-        print(f"{DEFAULT_CLASSES[idx]}: {score:.4f}")
+        print(f"{classes[idx]}: {score:.4f}")
 
 
 if __name__ == "__main__":
