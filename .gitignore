@@ -6,6 +6,7 @@ data/
 *.rar
 *.7z
 
+
 # Logs
 *.log
 dataset_download.log
