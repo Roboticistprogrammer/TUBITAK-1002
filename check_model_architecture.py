@@ -88,4 +88,4 @@ def analyze_checkpoint(checkpoint_path):
     print("\n✓ Analysis saved to model_analysis.json")
 
 if __name__ == '__main__':
-    analyze_checkpoint('Models/best_model_base.pth')
+    analyze_checkpoint('Models/best_model.pth')

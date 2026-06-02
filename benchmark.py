@@ -17,13 +17,15 @@ import torch.backends.cudnn as cudnn
 import time
 import numpy as np
 import sys
+import json
+from datetime import datetime
 from pathlib import Path
 from PIL import Image
 import torchvision.transforms as transforms
 
 # Add Models directory to path
 sys.path.insert(0, '/home/dronex/Documents/TUBITAK-1002/Models')
-from swin_transformer import SwinTransformer
+from Models.swin_transformer import SwinTransformer
 
 cudnn.benchmark = True
 
@@ -134,10 +136,17 @@ def make_prediction(model, image_path, class_names, device='cuda'):
 if __name__ == "__main__":
     # Configuration
     MODEL_PATH = "/home/dronex/Documents/TUBITAK-1002/Models/best_model_base.pth"
-    BATCH_SIZE = 32
+    BATCH_SIZE = 8  # Reduced for Jetson Orin compatibility
     INPUT_SHAPE = (BATCH_SIZE, 3, 224, 224)
     CLASS_NAMES = ['fire', 'neither', 'smoke']
-    TEST_IMAGE = "/home/dronex/Documents/TUBITAK-1002/dataset/firee.jpg"
+    DATASET_FOLDER = "/home/dronex/Documents/TUBITAK-1002/dataset"
+    OUTPUT_DIR = "result"
+    
+    # Try to find a test image
+    dataset_path = Path(DATASET_FOLDER)
+    image_extensions = {'.jpg', '.jpeg', '.png', '.bmp'}
+    test_images = [f for f in dataset_path.rglob('*') if f.suffix.lower() in image_extensions]
+    TEST_IMAGE = str(test_images[0]) if test_images else None
     
     # Print system information
     print("=" * 70)
@@ -163,11 +172,81 @@ if __name__ == "__main__":
     print("=" * 70)
     cpu_time = benchmark(model, device="cpu", input_shape=INPUT_SHAPE, nwarmup=10, nruns=50)
     
-    # Step 6: Make predictions with CPU model
+    # Step 3: Make predictions with CPU model on dataset
     print("\n" + "=" * 70)
-    print("STEP 3: Predictions with CPU Model")
+    print("STEP 3: Testing CPU Model on Dataset Images")
     print("=" * 70)
-    make_prediction(model, TEST_IMAGE, CLASS_NAMES, device='cpu')
+    
+    if TEST_IMAGE:
+        # Test on multiple images from dataset
+        test_count = min(10, len(test_images))
+        print(f"Testing on {test_count} images from dataset...\n")
+        
+        output_path = Path(OUTPUT_DIR)
+        output_path.mkdir(exist_ok=True)
+        
+        results = []
+        for idx, img_path in enumerate(test_images[:test_count], 1):
+            print(f"[{idx}/{test_count}] {img_path.name}")
+            try:
+                transform = transforms.Compose([
+                    transforms.Resize((224, 224)),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=[0.485, 0.456, 0.406],
+                        std=[0.229, 0.224, 0.225]
+                    )
+                ])
+                
+                image = Image.open(img_path).convert('RGB')
+                image_tensor = transform(image).unsqueeze(0).to('cpu')
+                
+                with torch.no_grad():
+                    start = time.time()
+                    outputs = model(image_tensor)
+                    inference_time = (time.time() - start) * 1000
+                    
+                    probabilities = torch.nn.functional.softmax(outputs[0], dim=0)
+                
+                probs, classes = torch.topk(probabilities, len(CLASS_NAMES))
+                
+                result = {
+                    "image": img_path.name,
+                    "prediction": CLASS_NAMES[int(classes[0])],
+                    "confidence": float(probs[0].item()),
+                    "inference_time_ms": inference_time,
+                    "probabilities": {
+                        CLASS_NAMES[int(classes[i])]: float(probs[i].item())
+                        for i in range(len(CLASS_NAMES))
+                    }
+                }
+                results.append(result)
+                
+                print(f"  Prediction: {result['prediction']} ({result['confidence']*100:.2f}%)")
+                print(f"  Inference: {inference_time:.2f} ms\n")
+                
+            except Exception as e:
+                print(f"  Error: {e}\n")
+        
+        # Save results
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        json_path = output_path / f"cpu_inference_results_{timestamp}.json"
+        with open(json_path, 'w') as f:
+            json.dump({
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "model": "SwinTransformer",
+                "device": "CPU",
+                "results": results,
+                "summary": {
+                    "total_images": len(results),
+                    "avg_inference_time_ms": np.mean([r["inference_time_ms"] for r in results]) if results else 0,
+                    "avg_confidence": np.mean([r["confidence"] for r in results]) if results else 0
+                }
+            }, f, indent=4)
+        
+        print(f"✓ Results saved to {json_path}\n")
+    else:
+        print("⚠ No test images found in dataset folder")
     
     # Check if CUDA is available
     if not torch.cuda.is_available():

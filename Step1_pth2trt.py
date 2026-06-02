@@ -10,7 +10,7 @@ import sys
 sys.path.insert(0, '/home/dronex/Documents/TUBITAK-1002/Models')
 
 # Import your custom Swin Transformer model
-from swin_transformer import SwinTransformer
+from Models.swin_transformer import SwinTransformer
 
 def convert_pth_to_onnx(model_path, output_onnx_path, model_class, device='cuda'):
     """
@@ -48,6 +48,7 @@ def convert_pth_to_onnx(model_path, output_onnx_path, model_class, device='cuda'
     dummy_input = torch.randn(1, 3, 224, 224).to(device)
     
     # Export to ONNX with dynamic shapes
+    # Using opset 11 for better TensorRT compatibility
     torch.onnx.export(
         model,
         dummy_input,
@@ -58,12 +59,36 @@ def convert_pth_to_onnx(model_path, output_onnx_path, model_class, device='cuda'
             'image': {0: 'batch_size'},  
             'output': {0: 'batch_size'}
         },
-        opset_version=12,
+        opset_version=11,  # Lower opset for TensorRT compatibility
         do_constant_folding=True,
-        verbose=True
+        export_params=True,
+        verbose=False
     )
     
     print(f"✓ Model converted and saved to {output_onnx_path}")
+    
+    # Simplify ONNX model for TensorRT compatibility
+    try:
+        import onnx
+        from onnxsim import simplify
+        
+        print("\nSimplifying ONNX model for TensorRT...")
+        onnx_model = onnx.load(output_onnx_path)
+        model_simp, check = simplify(onnx_model)
+        
+        if check:
+            simplified_path = output_onnx_path.replace('.onnx', '_simplified.onnx')
+            onnx.save(model_simp, simplified_path)
+            print(f"✓ Simplified model saved to {simplified_path}")
+            print("  Use the simplified model for TensorRT conversion")
+        else:
+            print("⚠ ONNX simplification check failed, using original model")
+    except ImportError:
+        print("\n⚠ onnx-simplifier not installed. Install with: pip3 install onnx-simplifier")
+        print("  Simplification can improve TensorRT compatibility")
+    except Exception as e:
+        print(f"⚠ ONNX simplification failed: {e}")
+        print("  Continuing with original ONNX model")
 
 def test_inference_on_dataset(model, dataset_folder, device='cuda', batch_size=4, class_names=None):
     """
@@ -126,11 +151,11 @@ def test_inference_on_dataset(model, dataset_folder, device='cuda', batch_size=4
 
 if __name__ == "__main__":
     # Configuration
-    MODEL_PATH = "/home/dronex/Documents/TUBITAK-1002/Models/best_model_base.pth"
+    MODEL_PATH = "/home/dronex/Documents/TUBITAK-1002/Models/best_model.pth"
     ONNX_PATH = "/home/dronex/Documents/TUBITAK-1002/model.onnx"
     DATASET_FOLDER = "/home/dronex/Documents/TUBITAK-1002/dataset"
     DEVICE = 'cpu'  # Using CPU due to CUDA memory issues
-    CLASS_NAMES = ['fire', 'neither', 'smoke']  # Based on your dataset
+    CLASS_NAMES = ['fire', 'neither', 'smoke','both']  # Based on your dataset
     
     print(f"Using device: {DEVICE}")
     print(f"Model path: {MODEL_PATH}")
