@@ -1,0 +1,32 @@
+{
+  "neither.jpg": {
+    "predicted_class": "Smoke",
+    "predicted_index": 1,
+    "confidence": 0.8604779839515686,
+    "probabilities": {
+      "Fire": 0.027104467153549194,
+      "Smoke": 0.8604779839515686,
+      "Neither": 0.11241761595010757
+    }
+  },
+  "smoke.jpg": {
+    "predicted_class": "Smoke",
+    "predicted_index": 1,
+    "confidence": 0.8995727896690369,
+    "probabilities": {
+      "Fire": 0.07023783773183823,
+      "Smoke": 0.8995727896690369,
+      "Neither": 0.030189411714673042
+    }
+  },
+  "firee.jpg": {
+    "predicted_class": "Fire",
+    "predicted_index": 0,
+    "confidence": 0.932564377784729,
+    "probabilities": {
+      "Fire": 0.932564377784729,
+      "Smoke": 0.030375899747014046,
+      "Neither": 0.03705969825387001
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+    "timestamp": "2026-01-15 21:00:49",
+    "test_results": {
+        "checkpoint_type": "metadata_included",
+        "status": "FAILED"
+    },
+    "errors": [
+        "Failed to test model: CUDA error: no kernel image is available for execution on the device\nSearch for `cudaErrorNoKernelImageForDevice' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+    ],
+    "warnings": [],
+    "device_info": {
+        "cuda_available": true,
+        "device": "cuda",
+        "gpu_name": "Orin",
+        "gpu_memory_total_gb": 7.99,
+        "gpu_memory_allocated_gb": 0.0,
+        "gpu_memory_cached_gb": 0.0,
+        "cuda_version": "12.6",
+        "pytorch_version": "2.9.0+cu126"
+    },
+    "model_info": {
+        "architecture": "SwinTransformer",
+        "total_parameters": 86702707,
+        "trainable_parameters": 86645083,
+        "non_trainable_parameters": 57624,
+        "model_size_mb": 330.74,
+        "config": {
+            "hidden_dim": 128,
+            "layers": [
+                2,
+                2,
+                18,
+                2
+            ],
+            "heads": [
+                4,
+                8,
+                16,
+                32
+            ],
+            "num_classes": 3,
+            "window_size": 7,
+            "relative_pos_embedding": true
+        }
+    }
+}
