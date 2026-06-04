@@ -6,6 +6,7 @@ This script creates a complete ONNX model without external data file dependencie
 
 import torch
 import torch.onnx
+import onnx
 import sys
 import os
 from pathlib import Path
@@ -14,6 +15,31 @@ from pathlib import Path
 sys.path.insert(0, '/home/dronex/Documents/TUBITAK-1002/Models')
 
 from Models.swin_transformer import SwinTransformer
+
+
+def remove_scatternd_reduction_attr(onnx_path: str) -> int:
+    """
+    TensorRT 10.8 fails when ScatterND contains the optional `reduction` attribute,
+    even when it is set to "none". Remove this attribute for compatibility.
+    """
+    model = onnx.load(onnx_path)
+    modified = 0
+
+    for node in model.graph.node:
+        if node.op_type != "ScatterND":
+            continue
+
+        has_reduction = any(attr.name == "reduction" for attr in node.attribute)
+        if has_reduction:
+            kept_attrs = [attr for attr in node.attribute if attr.name != "reduction"]
+            del node.attribute[:]
+            node.attribute.extend(kept_attrs)
+            modified += 1
+
+    if modified > 0:
+        onnx.save(model, onnx_path)
+
+    return modified
 
 def export_onnx_for_triton():
     """
@@ -106,16 +132,22 @@ def export_onnx_for_triton():
             print(f"  ✗ No external data file found!")
             return False
     
+    print("\n6. Patching ONNX graph for TensorRT compatibility...")
+    patched_nodes = remove_scatternd_reduction_attr(output_onnx)
+    if patched_nodes > 0:
+        print(f"  ✓ Removed unsupported ScatterND reduction attribute from {patched_nodes} node(s)")
+    else:
+        print("  No ScatterND reduction attributes found")
+
     # Verify the model can be loaded
-    print("\n6. Verifying ONNX model...")
+    print("\n7. Verifying ONNX model...")
     try:
-        import onnx
         onnx_model = onnx.load(output_onnx)
         onnx.checker.check_model(onnx_model)
         print("  ✓ ONNX model is valid!")
         
         # Print input/output info for config.pbtxt
-        print("\n7. Model I/O Information (for config.pbtxt):")
+        print("\n8. Model I/O Information (for config.pbtxt):")
         print(f"  Input name: {onnx_model.graph.input[0].name}")
         input_shape = [dim.dim_value if dim.dim_value > 0 else -1 
                       for dim in onnx_model.graph.input[0].type.tensor_type.shape.dim]
