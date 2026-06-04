@@ -1,0 +1,44 @@
+{
+  "experiment": {
+    "title": "Teacher-Student Comparison (Host Machine)",
+    "hardware": "Host Machine",
+    "date": 1780593982.1577988
+  },
+  "models": [],
+  "skipped_models": [
+    {
+      "name": "Teacher_CV_pt",
+      "path": "outputs/teachers/FASDD_CV/best.pt",
+      "reason": "disabled_in_config"
+    },
+    {
+      "name": "Teacher_RS_pt",
+      "path": "outputs/teachers/FASDD_RS/best.pt",
+      "reason": "disabled_in_config"
+    },
+    {
+      "name": "Teacher_UAV_pt",
+      "path": "outputs/teachers/FASDD_UAV/best.pt",
+      "reason": "disabled_in_config"
+    },
+    {
+      "name": "Student_pt",
+      "path": "outputs/students/last.pt",
+      "reason": "disabled_in_config"
+    }
+  ],
+  "failed_models": [
+    {
+      "name": "Student_onnx",
+      "path": "E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\TUBITAK-1002\\model_repository\\swin-transform\\1\\model.onnx",
+      "stage": "evaluation",
+      "reason": "zero_domains_evaluated"
+    },
+    {
+      "name": "Student_engine",
+      "path": "E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\TUBITAK-1002\\model_repository\\swin-transform\\1\\model.engine",
+      "stage": "evaluation",
+      "reason": "zero_domains_evaluated"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "model_name": "model",
+  "model_path": "E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\TUBITAK-1002\\model_repository\\swin-transform\\1\\model.onnx",
+  "domains": {
+    "FASDD_CV": {
+      "error": "Dataset 'C://Users/SEYED~1.JAS/AppData/Local/Temp/eval_fasdd_cv_rrbi96jw/fasdd_cv_data.yaml' images not found, missing path 'E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\TUBITAK-1002\\datasets\\FASDD_CV\\FASDD_CV\\datasets\\FASDD_CV\\FASDD_CV\\annotations\\YOLO_CV\\val.txt'\nNote dataset download directory is 'E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\datasets'. You can update this in 'C:\\Users\\seyed.jasemi\\AppData\\Roaming\\Ultralytics\\settings.json'"
+    },
+    "FASDD_RS": {
+      "error": "Dataset 'C://Users/SEYED~1.JAS/AppData/Local/Temp/eval_fasdd_rs_wo9lkw_2/fasdd_rs_data.yaml' images not found, missing path 'E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\TUBITAK-1002\\datasets\\FASDD_RS\\datasets\\FASDD_RS\\annotations\\YOLO_RS_RGB\\val.txt'\nNote dataset download directory is 'E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\datasets'. You can update this in 'C:\\Users\\seyed.jasemi\\AppData\\Roaming\\Ultralytics\\settings.json'"
+    },
+    "FASDD_UAV": {
+      "error": "Dataset 'C://Users/SEYED~1.JAS/AppData/Local/Temp/eval_fasdd_uav_fxepyd8d/fasdd_uav_data.yaml' images not found, missing path 'E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\TUBITAK-1002\\datasets\\FASDD_UAV\\datasets\\FASDD_UAV\\annotations\\YOLO_UAV\\val.txt'\nNote dataset download directory is 'E:\\Projects-Seyed.Jasemi\\Amir_Thesis\\datasets'. You can update this in 'C:\\Users\\seyed.jasemi\\AppData\\Roaming\\Ultralytics\\settings.json'"
+    }
+  },
+  "metrics": {
+    "mAP50": 0.0,
+    "mAP50_95": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "evaluated_domains": 0
+}

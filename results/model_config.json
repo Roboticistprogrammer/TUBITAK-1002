@@ -1,0 +1,44 @@
+{
+  "models": [
+    {
+      "name": "Teacher_CV_pt",
+      "path": "outputs/teachers/FASDD_CV/best.pt",
+      "type": "teacher",
+      "format": "pt",
+      "enabled": false
+    },
+    {
+      "name": "Teacher_RS_pt",
+      "path": "outputs/teachers/FASDD_RS/best.pt",
+      "type": "teacher",
+      "format": "pt",
+      "enabled": false
+    },
+    {
+      "name": "Teacher_UAV_pt",
+      "path": "outputs/teachers/FASDD_UAV/best.pt",
+      "type": "teacher",
+      "format": "pt",
+      "enabled": false
+    },
+    {
+      "name": "Student_pt",
+      "path": "outputs/students/last.pt",
+      "type": "student",
+      "format": "pt",
+      "enabled": false
+    },
+    {
+      "name": "Student_onnx",
+      "path": "model_repository/swin-transform/1/model.onnx",
+      "type": "student",
+      "format": "onnx"
+    },
+    {
+      "name": "Student_engine",
+      "path": "model_repository/swin-transform/1/model.engine",
+      "type": "student",
+      "format": "engine"
+    }
+  ]
+}
