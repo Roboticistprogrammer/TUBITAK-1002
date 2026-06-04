@@ -6,3 +6,10 @@
 3. Configure DeepStream as a ClientDeepStream will act as the client that sends video frames to Triton for inference via the nvinferserver plugin.DeepStream Config: Edit your deepstream_app_config.txt to point to a secondary inference configuration file.Inference Config: In your config_infer_primary_triton.txt, specify the Triton server details (URL, model name) and the input/output tensor names defined in your config.pbtxt.
 
 4. Deployment and ExecutionLaunch Triton Server: Use the official Triton Docker container to start the server and load your model repository.Run DeepStream App: Execute deepstream-app -c deepstream_app_config.txt to start the pipeline and visualize the inference.
+
+Setup:
+> Terminal 1
+ docker run --runtime=nvidia --rm -p 8000:8000 -p 8001:8001 -p 8002:8002 -v ${PWD}/model_repository:/models nvcr.io/nvidia/deepstream:7.1-triton-multiarch tritonserver --model-repository=/models
+
+>Terminal 2
+python triton_client.py
