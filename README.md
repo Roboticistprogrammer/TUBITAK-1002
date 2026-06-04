@@ -1,15 +1,98 @@
-# TensorRT Deployment
-1. Convert to TensorRT EngineTriton and DeepStream perform best with TensorRT (.engine) files. You can export your model directly using the Ultralytics CLI or Python API.CLI Export: Run yolo export model=best.pt format=engine device=0 half=True to create an FP16-optimized engine.Python Export: Use model.export(format='engine', half=True) to generate the file.
+# Jetson Benchmark + Visual Report Workflow
 
-2. Set Up the Triton Model RepositoryTriton requires a specific folder structure to serve your model.Create a directory named model_repository.Inside it, create a folder for your model (e.g., yolov8_model).Inside that, create a version folder named 1 and place your .engine file there.Create a config.pbtxt file in the yolov8_model folder to define inputs (e.g., shape [3, 640, 640]) and outputs.
+This repository includes two dedicated scripts for testing your models separately on Jetson:
 
-3. Configure DeepStream as a ClientDeepStream will act as the client that sends video frames to Triton for inference via the nvinferserver plugin.DeepStream Config: Edit your deepstream_app_config.txt to point to a secondary inference configuration file.Inference Config: In your config_infer_primary_triton.txt, specify the Triton server details (URL, model name) and the input/output tensor names defined in your config.pbtxt.
+- `benchmark_models.py`: numeric performance benchmarking
+- `visualize_outputs.py`: report-ready visual predictions
 
-4. Deployment and ExecutionLaunch Triton Server: Use the official Triton Docker container to start the server and load your model repository.Run DeepStream App: Execute deepstream-app -c deepstream_app_config.txt to start the pipeline and visualize the inference.
+## Models
 
-Setup:
-> Terminal 1
- docker run --runtime=nvidia --rm -p 8000:8000 -p 8001:8001 -p 8002:8002 -v ${PWD}/model_repository:/models nvcr.io/nvidia/deepstream:7.1-triton-multiarch tritonserver --model-repository=/models
+Current models:
 
->Terminal 2
-python triton_client.py
+- `models/model.onnx`
+- `models/model.engine`
+
+## Metrics Captured
+
+`benchmark_models.py` captures:
+
+- Latency (mean, p50, p95)
+- Throughput (images/sec)
+- FPS
+- Power (avg/max watts from `tegrastats`)
+- Energy per image (J)
+
+## Install
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Jetson notes:
+
+- `tensorrt` and `pycuda` typically come from JetPack/NVIDIA packages.
+- For ONNX GPU, use your Jetson-compatible `onnxruntime-gpu` build.
+
+## 1) Benchmark ONNX model
+
+```bash
+python3 benchmark_models.py \
+	--model-path models/model.onnx \
+	--model-type onnx \
+	--sample-dir sample \
+	--batch-size 1 \
+	--warmup 20 \
+	--runs 100
+```
+
+## 2) Benchmark TensorRT engine model
+
+```bash
+python3 benchmark_models.py \
+	--model-path models/model.engine \
+	--model-type engine \
+	--sample-dir sample \
+	--batch-size 1 \
+	--warmup 20 \
+	--runs 100
+```
+
+## 3) Generate visual outputs for ONNX model
+
+```bash
+python3 visualize_outputs.py \
+	--model-path models/model.onnx \
+	--model-type onnx \
+	--sample-dir sample \
+	--class-names fire,neither,smoke \
+	--max-images-per-class 30 \
+	--save-contact-sheet
+```
+
+## 4) Generate visual outputs for TensorRT engine
+
+```bash
+python3 visualize_outputs.py \
+	--model-path models/model.engine \
+	--model-type engine \
+	--sample-dir sample \
+	--class-names fire,neither,smoke \
+	--max-images-per-class 30 \
+	--save-contact-sheet
+```
+
+## Output Structure
+
+- Benchmarks: `outputs/benchmarks/<model_name>/<timestamp>/`
+	- `metrics.json`
+	- `metrics.csv`
+	- `tegrastats.log`
+- Visuals: `outputs/visuals/<model_name>/<timestamp>/`
+	- annotated images under original `sample/` hierarchy
+	- `predictions.json`
+	- `predictions.csv`
+	- `contact_sheet.png` (if enabled)
+
+## Existing Triton Flow
+
+If needed, the existing Triton setup remains available via `triton_client.py`.
