@@ -1,0 +1,57 @@
+{
+  "experiment": {
+    "title": "Teacher-Student Comparison (Host Machine)",
+    "hardware": "Host Machine",
+    "date": 1780934279.4900281
+  },
+  "models": [
+    {
+      "name": "Student_pt",
+      "family": "student",
+      "format": "pt",
+      "metrics": {},
+      "deployment": {
+        "latency_ms": 0.0,
+        "fps": 0.0,
+        "throughput": 0.0,
+        "throughput_samples_per_sec": 0.0,
+        "weights_mb": 994.959584236145,
+        "size_mb": 994.959584236145
+      },
+      "domains": {}
+    },
+    {
+      "name": "Student_onnx",
+      "family": "student",
+      "format": "onnx",
+      "metrics": {},
+      "deployment": {
+        "latency_ms": 95.60589070017159,
+        "fps": 10.459606543869636,
+        "throughput": 10.459606543869636,
+        "throughput_samples_per_sec": 18.64619293622867,
+        "weights_mb": 189.91297054290771,
+        "size_mb": 189.91297054290771,
+        "power_draw_w": 71.20344999999999
+      },
+      "domains": {}
+    },
+    {
+      "name": "Student_engine",
+      "family": "student",
+      "format": "engine",
+      "metrics": {},
+      "deployment": {
+        "latency_ms": 0.0,
+        "fps": 0.0,
+        "throughput": 0.0,
+        "throughput_samples_per_sec": 0.0,
+        "weights_mb": 190.5642204284668,
+        "size_mb": 190.5642204284668
+      },
+      "domains": {}
+    }
+  ],
+  "skipped_models": [],
+  "failed_models": []
+}

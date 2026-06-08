@@ -1,0 +1,22 @@
+{
+  "model_name": "model",
+  "model_type": "engine",
+  "deployment": {
+    "latency_ms": 0.0,
+    "fps": 0.0,
+    "throughput": 0.0,
+    "throughput_samples_per_sec": 0.0,
+    "weights_mb": 190.5642204284668,
+    "size_mb": 190.5642204284668
+  },
+  "all_batch_results": {
+    "model_size_mb": 190.5642204284668,
+    "batch_1": {
+      "latency_ms": 0.0,
+      "std_ms": 0.0,
+      "fps": 0.0,
+      "throughput": 0.0
+    },
+    "error": "Engine version mismatch (installed TRT 11.0.0.114)"
+  }
+}

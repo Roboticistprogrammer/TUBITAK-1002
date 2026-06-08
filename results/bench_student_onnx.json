@@ -1,0 +1,40 @@
+{
+  "model_name": "model",
+  "model_type": "onnx",
+  "deployment": {
+    "latency_ms": 95.60589070017159,
+    "fps": 10.459606543869636,
+    "throughput": 10.459606543869636,
+    "throughput_samples_per_sec": 18.64619293622867,
+    "weights_mb": 189.91297054290771,
+    "size_mb": 189.91297054290771,
+    "power_draw_w": 71.20344999999999
+  },
+  "all_batch_results": {
+    "batch_1": {
+      "latency_ms": 95.60589070017159,
+      "std_ms": 11.81030543724273,
+      "fps": 10.459606543869636,
+      "throughput": 10.459606543869636,
+      "batch_latency_ms": 95.60589070017159,
+      "power_draw_w": 71.20344999999999
+    },
+    "batch_4": {
+      "latency_ms": 53.63025060504697,
+      "std_ms": 6.8593663612693385,
+      "fps": 18.64619293622867,
+      "throughput": 18.64619293622867,
+      "batch_latency_ms": 214.52100242018787,
+      "power_draw_w": 78.188675
+    },
+    "batch_8": {
+      "latency_ms": 55.251074429988876,
+      "std_ms": 16.644281635418096,
+      "fps": 18.099195541747246,
+      "throughput": 18.099195541747246,
+      "batch_latency_ms": 442.008595439911,
+      "power_draw_w": 78.85505
+    },
+    "model_size_mb": 189.91297054290771
+  }
+}

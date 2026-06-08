@@ -1,0 +1,23 @@
+{
+  "model_name": "model",
+  "model_path": "/mnt/e/Projects-Seyed.Jasemi/Amir_Thesis/TUBITAK-1002/Models/model.onnx",
+  "domains": {
+    "FASDD_CV": {
+      "error": "No module named 'onnxruntime'"
+    },
+    "FASDD_RS": {
+      "error": "No module named 'onnxruntime'"
+    },
+    "FASDD_UAV": {
+      "error": "No module named 'onnxruntime'"
+    }
+  },
+  "metrics": {
+    "mAP50": 0.0,
+    "mAP50_95": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "evaluated_domains": 0
+}

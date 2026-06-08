@@ -1,0 +1,21 @@
+{
+  "model_name": "last",
+  "model_type": "pt",
+  "deployment": {
+    "latency_ms": 0.0,
+    "fps": 0.0,
+    "throughput": 0.0,
+    "throughput_samples_per_sec": 0.0,
+    "weights_mb": 994.959584236145,
+    "size_mb": 994.959584236145
+  },
+  "all_batch_results": {
+    "model_size_mb": 994.959584236145,
+    "batch_1": {
+      "latency_ms": 0.0,
+      "std_ms": 0.0,
+      "fps": 0.0,
+      "throughput": 0.0
+    }
+  }
+}
