@@ -23,6 +23,7 @@ wheels/
 
 # PyTorch
 logs/
+**.pt
 #results/
 
 # Jupyter Notebook
