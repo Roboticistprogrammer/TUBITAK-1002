@@ -1,0 +1,30 @@
+{
+  "models": [
+    {
+      "name": "Student_pt",
+      "path": "Models/students/last.pt",
+      "type": "student",
+      "format": "pt",
+      "enabled": true,
+      "skip_evaluation": true
+    },
+    {
+      "name": "Student_onnx",
+      "path": "Models/model.onnx",
+      "type": "student",
+      "format": "onnx",
+      "enabled": true,
+      "skip_evaluation": true,
+      "imgsz": 224
+    },
+    {
+      "name": "Student_engine",
+      "path": "Models/model.engine",
+      "type": "student",
+      "format": "engine",
+      "enabled": true,
+      "skip_evaluation": true,
+      "imgsz": 224
+    }
+  ]
+}
