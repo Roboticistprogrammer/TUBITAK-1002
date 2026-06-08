@@ -1,0 +1,4 @@
+Accuracy comparison:
+- cv: student_acc=0.8616 (microsoft/swinv2-base-patch4-window12-192-22k) teacher_acc=0.9412 (microsoft/swinv2-large-patch4-window12-192-22k)
+- rs: student_acc=0.8838 (microsoft/swinv2-base-patch4-window12-192-22k) teacher_acc=0.9216 (microsoft/swinv2-large-patch4-window12-192-22k)
+- uav: student_acc=0.9302 (microsoft/swinv2-base-patch4-window12-192-22k) teacher_acc=0.9538 (microsoft/swinv2-large-patch4-window12-192-22k)
