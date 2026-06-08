@@ -22,7 +22,6 @@ wheels/
 *.egg
 
 # PyTorch
-*.pt
 logs/
 #results/
 
@@ -53,4 +52,4 @@ datasets/
 
 # Temporary files
 *.log
-*.tmp
+*.tmp.specstory/
