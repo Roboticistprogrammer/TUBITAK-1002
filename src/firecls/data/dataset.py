@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import csv
-from pathlib import Path
-from typing import List, Tuple
+from pathlib import Path, PureWindowsPath
+from typing import List, Optional, Tuple
 
 from PIL import Image
 from torch.utils.data import Dataset
@@ -16,6 +16,7 @@ class ImageClassificationCSVDataset(Dataset):
         class_names: List[str],
         transform=None,
         return_path: bool = False,
+        images_root: Optional[Path] = None,
     ) -> None:
         self.csv_path = Path(csv_path)
         self.split = split
@@ -33,7 +34,8 @@ class ImageClassificationCSVDataset(Dataset):
                 label = row["label"].lower()
                 if label not in self.label_to_id:
                     raise ValueError(f"Unknown label '{label}' in {csv_path}")
-                self.samples.append((Path(row["path"]), self.label_to_id[label]))
+                image_path = resolve_indexed_image_path(row["path"], images_root)
+                self.samples.append((image_path, self.label_to_id[label]))
 
     def __len__(self) -> int:
         return len(self.samples)
@@ -46,3 +48,29 @@ class ImageClassificationCSVDataset(Dataset):
         if self.return_path:
             return image, label, str(image_path)
         return image, label
+
+
+def resolve_indexed_image_path(raw_path: str, images_root: Optional[Path] = None) -> Path:
+    """Resolve CSV paths created on Windows, WSL, Linux, or inside a container."""
+    direct = Path(raw_path)
+    if direct.exists() or images_root is None:
+        return direct
+
+    root = Path(images_root)
+    normalized = raw_path.replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part]
+    lower = [part.lower() for part in parts]
+    if "images" in lower:
+        relative = Path(*parts[lower.index("images") + 1 :])
+        candidate = root / relative
+        if candidate.exists():
+            return candidate
+
+    filename = PureWindowsPath(raw_path).name
+    candidate = root / filename
+    if candidate.exists():
+        return candidate
+
+    raise FileNotFoundError(
+        f"Could not resolve indexed image '{raw_path}' beneath images root '{root}'."
+    )

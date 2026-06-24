@@ -1,5 +1,10 @@
 # Fire Classification with SwinV2-L Teachers
 
+> **Deployment work now lives on `student-deployment-v2`.** The classification-native,
+> manifest-verified PT → ONNX → TensorRT procedure is documented in
+> [`docs/DEPLOYMENT_PIPELINE.md`](docs/DEPLOYMENT_PIPELINE.md). Do not use the historical
+> Ultralytics/detection export scripts for these SwinV2 classification checkpoints.
+
 This workspace trains **SwinV2-L (patch4-window12-192-22k)** teachers on each FASDD domain (CV/UAV/RS) using TDML annotations converted into image-level labels.
 
 ## Datasets

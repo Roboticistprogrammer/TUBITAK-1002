@@ -1,0 +1,12 @@
+.git
+.venv
+__pycache__
+*.pyc
+*.pt
+*.onnx
+*.engine
+artifacts
+datasets
+outputs
+results
+.specstory
