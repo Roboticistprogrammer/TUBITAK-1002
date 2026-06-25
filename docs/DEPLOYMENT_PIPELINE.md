@@ -47,12 +47,6 @@ runs.
 docker compose build pipeline
 ```
 
-Set the dataset directory when it is not located at `./datasets`:
-
-```bash
-export DATASETS_DIR=/absolute/path/to/datasets
-```
-
 ## Export PT to ONNX
 
 ```bash
@@ -80,8 +74,16 @@ ONNX to the Jetson and rebuild the engine there in a JetPack-compatible containe
 
 ## Evaluate teachers and student runtimes
 
+Datasets are not mounted for export or engine conversion. Attach them only when you
+run evaluation. If the datasets are not located at `./datasets`, set
+`DATASETS_DIR` first.
+
 ```bash
-docker compose run --rm pipeline python scripts/evaluate_deployments.py \
+export DATASETS_DIR=/absolute/path/to/datasets
+
+docker compose run --rm \
+  --volume "${DATASETS_DIR:-./datasets}:/workspace/datasets:ro" \
+  pipeline python scripts/evaluate_deployments.py \
   --student-pt Models/students/last.pt \
   --student-onnx artifacts/student.onnx \
   --student-engine artifacts/student_fp16.engine \
@@ -111,6 +113,10 @@ docker compose run --rm pipeline python scripts/benchmark_deployments.py \
   --student-engine artifacts/student_fp16.engine \
   --batch-sizes 1 4 8 \
   --output results/deployment_benchmark.json
+
+docker compose run --rm pipeline python scripts/plot_deployment_benchmark.py \
+  --input results/deployment_benchmark.json \
+  --output results/deployment_benchmark.png
 ```
 
 The benchmark reports mean, median, p95, standard deviation, per-image latency, and
