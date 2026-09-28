@@ -45,6 +45,16 @@ class PresenceScoreTests(unittest.TestCase):
         self.assertAlmostEqual(best["t_smoke"], 0.6)
         self.assertAlmostEqual(best["objective"], 1.0)
 
+    def test_probability_equal_to_threshold_counts_as_present(self):
+        """Regression: p == t used to map to q == 0.5, a four-way tie resolved to the first class."""
+        p = np.array([0.5, 0.3, 0.5, 0.2], dtype=np.float32)
+        s = np.array([0.5, 0.5, 0.1, 0.2], dtype=np.float32)
+        expected = ["both", "smoke", "fire", "neither"]
+        self.assertEqual([CLASSES[i] for i in presence_to_scores(p, s, 0.5, 0.5).argmax(1)], expected)
+        torch_scores = PresenceToScores(0.5, 0.5)(torch.from_numpy(p), torch.from_numpy(s))
+        self.assertEqual([CLASSES[i] for i in torch_scores.argmax(1).tolist()], expected)
+        self.assertEqual([CLASSES[i] for i in torch_scores.half().float().argmax(1).tolist()], expected)
+
 
 class PreprocessingTests(unittest.TestCase):
     def test_letterbox_shape_and_padding(self):

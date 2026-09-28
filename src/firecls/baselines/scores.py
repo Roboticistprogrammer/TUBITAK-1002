@@ -23,10 +23,15 @@ from firecls.baselines.protocol import CLASSES
 from firecls.evaluation import classification_metrics
 
 
+# Gap kept around 0.5 so that p == t is not a tie between classes (q would be exactly 0.5), and
+# so the decision survives FP16 rounding of q in TensorRT engines (FP16 spacing near 0.5 ~ 4.9e-4).
+_MARGIN = 1e-3
+
+
 def _rescale(p, t):
-    """Piece-wise linear map [0,t)->[0,0.5), [t,1]->[0.5,1]. Works for numpy and torch."""
-    lower = 0.5 * p / t
-    upper = 0.5 + 0.5 * (p - t) / (1.0 - t)
+    """Piece-wise linear map [0,t)->[0,0.5-m), [t,1]->[0.5+m,1]. Works for numpy and torch."""
+    lower = (0.5 - _MARGIN) * p / t
+    upper = 0.5 + _MARGIN + (0.5 - _MARGIN) * (p - t) / (1.0 - t)
     if isinstance(p, torch.Tensor):
         return torch.where(p >= t, upper, lower)
     return np.where(p >= t, upper, lower)
