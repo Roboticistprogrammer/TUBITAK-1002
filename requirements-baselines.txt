@@ -1,0 +1,8 @@
+# Extra dependencies for the Pesonen et al. PIDNet-S baseline (branch baseline/pesonen-pidnet),
+# installed on top of requirements.txt. TensorRT comes from the JetPack / NGC container.
+torchvision>=0.17                # transforms.v2 + tv_tensors: joint image/mask augmentation
+opencv-python-headless>=4.8      # Canny edge targets for the PIDNet boundary branch
+onnx>=1.15
+onnxruntime>=1.17                # use onnxruntime-gpu on CUDA machines
+# Segment Anything (teacher). Pinned to the upstream commit the pipeline was written against.
+segment-anything @ git+https://github.com/facebookresearch/segment-anything.git@dca509fe793f601edb92606367a655c15ac00fdf
