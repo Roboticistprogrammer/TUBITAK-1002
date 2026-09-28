@@ -1,0 +1,5 @@
+# Baseline-specific dependencies, installed on top of requirements.txt.
+# YOLO baseline (branch baseline/yolo-vazquez). Pinned to the version the code was verified with:
+# Ultralytics changes training defaults between releases (e.g. what optimizer=auto resolves to and
+# the model-selection fitness), see docs/baselines/YOLO_VAZQUEZ.md.
+ultralytics==8.4.164
