@@ -1,5 +1,9 @@
 # Fire Classification with SwinV2-L Teachers
 
+> **Baseline comparison (Results chapter).** The shared protocol for comparing the distilled
+> student against literature baselines is documented in [`docs/BASELINES.md`](docs/BASELINES.md).
+> Each baseline lives on its own `baseline/*` branch built on `baselines/common`.
+
 > **Deployment work now lives on `student-deployment-v2`.** The classification-native,
 > manifest-verified PT → ONNX → TensorRT procedure is documented in
 > [`docs/DEPLOYMENT_PIPELINE.md`](docs/DEPLOYMENT_PIPELINE.md). Do not use the historical

@@ -53,3 +53,11 @@ datasets/
 # Temporary files
 *.log
 *.tmp
+# Baseline comparison outputs (large / machine-specific)
+outputs/baselines/
+artifacts/baselines/
+results/jetson/
+runs/
+datasets_yolo/
+pseudo_masks/
+third_party/weights/
