@@ -49,10 +49,15 @@ def build_domain_datasets(
 
 
 def combined_train_loader(
-    transform, batch_size: int, num_workers: int, dataset_root: Path | None = None, seed_generator=None
+    transform,
+    batch_size: int,
+    num_workers: int,
+    dataset_root: Path | None = None,
+    seed_generator=None,
+    index_root: Path | None = None,
 ) -> DataLoader:
     """All three domains' training splits concatenated, exactly as the student was trained."""
-    datasets = build_domain_datasets("train", transform, dataset_root)
+    datasets = build_domain_datasets("train", transform, dataset_root, index_root=index_root)
     return DataLoader(
         ConcatDataset(list(datasets.values())),
         batch_size=batch_size,
@@ -71,8 +76,9 @@ def domain_loaders(
     num_workers: int,
     dataset_root: Path | None = None,
     return_path: bool = False,
+    index_root: Path | None = None,
 ) -> dict[str, DataLoader]:
-    datasets = build_domain_datasets(split, transform, dataset_root, return_path=return_path)
+    datasets = build_domain_datasets(split, transform, dataset_root, return_path=return_path, index_root=index_root)
     return {
         domain: DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
         for domain, dataset in datasets.items()
