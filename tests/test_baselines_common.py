@@ -71,10 +71,6 @@ class PowerParsingTests(unittest.TestCase):
         self.assertIsNone(parse_power_mw("RAM 2000/3964MB CPU [10%@1400]"))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class BoxReaderTests(unittest.TestCase):
     def test_coco_and_yolo_agree(self):
         import json
@@ -107,3 +103,7 @@ class BoxReaderTests(unittest.TestCase):
             fire_y = next(b for b in from_yolo["a"] if b.cls == "fire")
             for u, v in zip((fire_c.x1, fire_c.y1, fire_c.x2, fire_c.y2), (fire_y.x1, fire_y.y1, fire_y.x2, fire_y.y2)):
                 self.assertAlmostEqual(u, v, places=5)
+
+
+if __name__ == "__main__":
+    unittest.main()
