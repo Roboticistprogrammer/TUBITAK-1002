@@ -52,14 +52,14 @@ doi:10.3390/s26103197.
    ("u": v5 backbone and neck with the v8 decoupled, DFL-based head). It differs from the original
    anchor-based YOLOv5n of the `ultralytics/yolov5` repository. State this wherever "YOLOv5n"
    appears in the thesis.
-7. **Optimizer.** `optimizer=auto` depends on the Ultralytics version. With our data
-   (61,323 training images, nominal batch 64, 20 epochs, about 19,180 iterations, which is over
-   10,000), ultralytics 8.4.164 selects **MuSGD** (lr 0.01, momentum 0.9). Releases before 8.4
-   selected **SGD** (lr 0.01, momentum 0.9) for the same case. The code keeps the library default,
-   as the protocol requires. To reproduce the pre-8.4 behaviour, pass
-   `--optimizer SGD --lr0 0.01 --momentum 0.9` (`TRAIN_ARGS=...` in `run_all.sh`). Whichever is
-   used, it is recorded in `train_summary.json` (`resolved_optimizer`). Decide this once, before
-   running the grid.
+7. **Optimizer (fixed explicitly).** Ultralytics' `optimizer=auto` depends on the library
+   version: with our data (61,323 training images, nominal batch 64, 20 epochs, about 19,180
+   iterations, which is over 10,000), ultralytics 8.4.164 resolves it to **MuSGD**, whereas the
+   releases contemporary with Vazquez et al. resolved the same case to **SGD** (lr 0.01,
+   momentum 0.9). `run_all.sh` therefore passes `--optimizer SGD --lr0 0.01 --momentum 0.9` by
+   default, so results do not depend on the installed Ultralytics version. Override with
+   `TRAIN_ARGS=...` if needed; the optimizer actually used is recorded in `train_summary.json`
+   (`resolved_optimizer`).
 8. **Preprocessing implementation.** Image-level evaluation uses the shared PIL letterbox
    (`firecls.baselines.preprocessing.Letterbox`, centred square padding) for every runtime.
    Ultralytics' own validation (detection table) uses its OpenCV letterbox with rectangular
@@ -97,7 +97,7 @@ Protocol values (identical for all baselines): 20 epochs, batch 16, seeds 42/43/
 
 | Setting | Default |
 |---|---|
-| optimizer | `auto` (see §2.7), weight decay 5e-4, warm-up 3 epochs, linear LR decay to `lrf = 0.01` |
+| optimizer | SGD, lr0 0.01, momentum 0.9 (see §2.7), weight decay 5e-4, warm-up 3 epochs, linear LR decay to `lrf = 0.01` |
 | augmentation | mosaic 1.0 (switched off for the last 10 epochs), HSV (0.015, 0.7, 0.4), translate 0.1, scale 0.5, horizontal flip 0.5 |
 | loss gains | box 7.5, cls 0.5, dfl 1.5; nominal batch 64 |
 | other | AMP on CUDA, EMA of weights, patience 100 (no early stop within 20 epochs), workers 8 |

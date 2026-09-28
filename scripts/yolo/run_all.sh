@@ -29,7 +29,8 @@ OUT_ROOT=${OUT_ROOT:-outputs/baselines/yolo}
 ART_DIR=${ART_DIR:-artifacts/baselines}
 RES_DIR=${RES_DIR:-results/baselines}
 BUILD_ENGINE=${BUILD_ENGINE:-0}
-TRAIN_ARGS=${TRAIN_ARGS:-}                  # extra train flags, e.g. "--optimizer SGD --lr0 0.01 --momentum 0.9"
+# Explicit optimizer so results do not depend on the Ultralytics version (docs §2.7).
+TRAIN_ARGS=${TRAIN_ARGS:-"--optimizer SGD --lr0 0.01 --momentum 0.9"}
 BENCH_ARGS=${BENCH_ARGS:-}                  # extra benchmark flags, e.g. "--batch-sizes 1 --runs 500"
 # Box sources, only needed until $DATA_DIR/fasdd_all.yaml exists (COCO .json or YOLO labels dir).
 CV_BOXES=${CV_BOXES:-}
