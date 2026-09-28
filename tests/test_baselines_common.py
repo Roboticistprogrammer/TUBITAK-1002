@@ -73,3 +73,37 @@ class PowerParsingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BoxReaderTests(unittest.TestCase):
+    def test_coco_and_yolo_agree(self):
+        import json
+        import tempfile
+        from pathlib import Path
+
+        from firecls.baselines.boxes import label_from_boxes, read_boxes
+
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            coco = {
+                "images": [{"id": 1, "file_name": "a.jpg", "width": 200, "height": 100},
+                           {"id": 2, "file_name": "sub/b.jpg", "width": 100, "height": 100}],
+                "categories": [{"id": 7, "name": "Smoke"}, {"id": 9, "name": "fire"}],
+                "annotations": [{"image_id": 1, "category_id": 9, "bbox": [20, 10, 100, 50]},
+                                {"image_id": 1, "category_id": 7, "bbox": [0, 0, 200, 100]}],
+            }
+            (d / "c.json").write_text(json.dumps(coco))
+            labels = d / "labels"
+            labels.mkdir()
+            (labels / "a.txt").write_text("1 0.35 0.35 0.5 0.5\n0 0.5 0.5 1.0 1.0\n")
+            (labels / "b.txt").write_text("")
+            (d / "classes.txt").write_text("smoke\nfire\n")
+
+            from_coco, from_yolo = read_boxes(d / "c.json"), read_boxes(labels)
+            self.assertEqual(sorted(from_coco), ["a", "b"])
+            self.assertEqual(label_from_boxes(from_coco["a"]), "both")
+            self.assertEqual(label_from_boxes(from_yolo["b"]), "neither")
+            fire_c = next(b for b in from_coco["a"] if b.cls == "fire")
+            fire_y = next(b for b in from_yolo["a"] if b.cls == "fire")
+            for u, v in zip((fire_c.x1, fire_c.y1, fire_c.x2, fire_c.y2), (fire_y.x1, fire_y.y1, fire_y.x2, fire_y.y2)):
+                self.assertAlmostEqual(u, v, places=5)
