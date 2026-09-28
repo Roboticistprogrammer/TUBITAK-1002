@@ -2,8 +2,9 @@
 
 Two modes cover every baseline:
 
-* ``resize_center_crop`` -- the student's evaluation transform (classifiers, PIDNet).
-* ``letterbox`` -- aspect-preserving resize with grey padding, as used by YOLO models.
+* ``resize_center_crop`` -- the student's evaluation transform (image classifiers).
+* ``letterbox`` -- aspect-preserving resize with grey padding (YOLO, PIDNet). It keeps the
+  full frame, which matters when labels come from boxes that a centre crop could cut off.
 """
 from __future__ import annotations
 
