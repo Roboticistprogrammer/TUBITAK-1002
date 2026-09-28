@@ -43,6 +43,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--engine", type=Path)
     parser.add_argument("--source", choices=SOURCES, default=None, help="provenance marker; default from manifest")
     parser.add_argument("--dataset-root", type=Path, default=ROOT, help="directory that contains datasets/")
+    parser.add_argument("--index-root", type=Path, default=ROOT, help="directory that contains data_index/")
     parser.add_argument("--split", choices=["val", "test"], default=EVAL_SPLIT)
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--num-workers", type=int, default=4)
@@ -90,7 +91,8 @@ def main() -> None:
     loaded = load_baseline(args.family, args.checkpoint, device)
     preprocessing = loaded.preprocessing
     loaders = domain_loaders(
-        args.split, build_transform(preprocessing), args.batch_size, args.num_workers, args.dataset_root, return_path=True
+        args.split, build_transform(preprocessing), args.batch_size, args.num_workers, args.dataset_root,
+        return_path=True, index_root=args.index_root,
     )
     source = args.source or loaded.metadata.get("source", "official")
 
