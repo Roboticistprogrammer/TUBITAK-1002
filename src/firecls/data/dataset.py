@@ -17,6 +17,7 @@ class ImageClassificationCSVDataset(Dataset):
         transform=None,
         return_path: bool = False,
         images_root: Optional[Path] = None,
+        domain_id: Optional[int] = None,
     ) -> None:
         self.csv_path = Path(csv_path)
         self.split = split
@@ -24,6 +25,7 @@ class ImageClassificationCSVDataset(Dataset):
         self.label_to_id = {name: idx for idx, name in enumerate(class_names)}
         self.transform = transform
         self.return_path = return_path
+        self.domain_id = domain_id
         self.samples: List[Tuple[Path, int]] = []
 
         with self.csv_path.open("r", encoding="utf-8") as f:
@@ -45,9 +47,12 @@ class ImageClassificationCSVDataset(Dataset):
         image = Image.open(image_path).convert("RGB")
         if self.transform is not None:
             image = self.transform(image)
+        item = (image, label)
+        if self.domain_id is not None:
+            item = item + (self.domain_id,)
         if self.return_path:
-            return image, label, str(image_path)
-        return image, label
+            item = item + (str(image_path),)
+        return item
 
 
 def resolve_indexed_image_path(raw_path: str, images_root: Optional[Path] = None) -> Path:

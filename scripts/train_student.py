@@ -17,7 +17,7 @@ from firecls.distillation.checkpointing import save_checkpoint
 from firecls.distillation.trainer import MultiTeacherDistillationTrainer
 from firecls.models.student import build_student_model
 from firecls.models.teacher import load_teachers
-from firecls.utils import save_json
+from firecls.utils import save_json, set_seed
 
 
 def parse_args() -> argparse.Namespace:
@@ -36,8 +36,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--temperature", type=float, default=4.0)
     parser.add_argument("--alpha", type=float, default=0.3)
     parser.add_argument("--beta", type=float, default=0.7)
-    parser.add_argument("--aggregation", type=str, default="weighted_avg")
+    parser.add_argument(
+        "--aggregation",
+        type=str,
+        default="weighted_avg",
+        choices=["weighted_avg", "max", "uncertainty_weighted", "domain_routed"],
+    )
+    parser.add_argument("--seed", type=int, default=None, help="seed for reproducible runs (42/43/44 in the thesis protocol)")
     return parser.parse_args()
+
+
+# Order of the teacher logits and of the domain ids; must match the teachers dict built in main().
+DOMAIN_ORDER = ["cv", "rs", "uav"]
 
 
 def build_transforms(img_size: int, mean, std):
@@ -60,19 +70,27 @@ def build_transforms(img_size: int, mean, std):
     return train_tf, eval_tf
 
 
-def build_domain_datasets(split: str, classes, transform) -> dict[str, ImageClassificationCSVDataset]:
+def build_domain_datasets(
+    split: str, classes, transform, tag_domains: bool = False
+) -> dict[str, ImageClassificationCSVDataset]:
+    # tag_domains makes each sample also yield its domain id (needed for --aggregation domain_routed).
     specs = get_dataset_specs(ROOT)
     datasets = {}
     for key, spec in specs.items():
         index_csv = Path("data_index") / f"{spec.name.lower()}_tdml.csv"
         if not index_csv.exists():
             raise SystemExit(f"CSV not found: {index_csv}. Run prepare_tdml_classification.py first.")
-        datasets[key] = ImageClassificationCSVDataset(index_csv, split, classes, transform=transform)
+        domain_id = DOMAIN_ORDER.index(key) if tag_domains else None
+        datasets[key] = ImageClassificationCSVDataset(
+            index_csv, split, classes, transform=transform, domain_id=domain_id
+        )
     return datasets
 
 
 def main() -> None:
     args = parse_args()
+    if args.seed is not None:
+        set_seed(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     teachers, classes, model_name = load_teachers(
@@ -96,7 +114,9 @@ def main() -> None:
     )
 
     train_tf, eval_tf = build_transforms(args.img_size, image_processor.image_mean, image_processor.image_std)
-    train_sets = build_domain_datasets("train", classes, train_tf)
+    train_sets = build_domain_datasets(
+        "train", classes, train_tf, tag_domains=(args.aggregation == "domain_routed")
+    )
     val_sets = build_domain_datasets("val", classes, eval_tf)
 
     train_dataset = ConcatDataset(list(train_sets.values()))
@@ -145,6 +165,8 @@ def main() -> None:
             "optimizer": optimizer.state_dict(),
             "classes": classes,
             "model_name": args.student_model,
+            "aggregation": args.aggregation,
+            "seed": args.seed,
             "avg_val": avg_val,
         }
         save_checkpoint(args.output_dir / "last.pt", checkpoint)

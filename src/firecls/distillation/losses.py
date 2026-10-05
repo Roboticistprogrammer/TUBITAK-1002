@@ -64,9 +64,10 @@ class MultiTeacherDistillationLoss(nn.Module):
         student_logits: torch.Tensor,
         teacher_logits_list: List[torch.Tensor],
         labels: torch.Tensor,
+        domain_ids: Optional[torch.Tensor] = None,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         hard_loss = self.ce_loss(student_logits, labels)
-        aggregated_teacher_soft = self._aggregate_teacher_soft(teacher_logits_list)
+        aggregated_teacher_soft = self._aggregate_teacher_soft(teacher_logits_list, domain_ids)
         student_soft = F.log_softmax(student_logits / self.temperature, dim=1)
 
         soft_loss = (
@@ -75,11 +76,31 @@ class MultiTeacherDistillationLoss(nn.Module):
         total_loss = self.alpha * hard_loss + self.beta * soft_loss
         return total_loss, hard_loss, soft_loss
 
-    def _aggregate_teacher_soft(self, teacher_logits_list: List[torch.Tensor]) -> torch.Tensor:
+    def _aggregate_teacher_soft(
+        self,
+        teacher_logits_list: List[torch.Tensor],
+        domain_ids: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         if len(teacher_logits_list) != self.num_teachers:
             raise ValueError(
                 f"Expected {self.num_teachers} teacher logits, got {len(teacher_logits_list)}."
             )
+
+        if self.aggregation == "domain_routed":
+            # Only the teacher matching each sample's own domain supplies its soft target;
+            # domain_ids[i] indexes teacher_logits_list in the cv/rs/uav order of load_teachers().
+            if domain_ids is None:
+                raise ValueError(
+                    "aggregation='domain_routed' requires per-sample domain_ids; build the training "
+                    "set with tag_domains=True (scripts/train_student.py)."
+                )
+            teacher_softs = torch.stack(
+                [F.softmax(logits / self.temperature, dim=1) for logits in teacher_logits_list], dim=0
+            )  # [num_teachers, batch, num_classes]
+            index = domain_ids.to(teacher_softs.device).view(1, -1, 1).expand(
+                1, teacher_softs.size(1), teacher_softs.size(2)
+            )
+            return teacher_softs.gather(0, index).squeeze(0)
 
         if self.aggregation == "weighted_avg":
             aggregated = torch.zeros_like(

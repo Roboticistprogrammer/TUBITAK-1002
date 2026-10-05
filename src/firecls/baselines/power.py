@@ -15,6 +15,7 @@ from pathlib import Path
 
 RAILS = ("VDD_IN", "POM_5V_IN", "VDD_CPU_GPU_CV")
 _PATTERN = re.compile(r"(?P<rail>[A-Z0-9_]+) (?P<now>\d+)(?:mW)?/(?P<avg>\d+)(?:mW)?")
+_RAM = re.compile(r"RAM (?P<used>\d+)/(?P<total>\d+)MB")
 
 
 def parse_power_mw(line: str) -> tuple[str, float] | None:
@@ -25,12 +26,31 @@ def parse_power_mw(line: str) -> tuple[str, float] | None:
     return None
 
 
+def parse_ram_mb(line: str) -> tuple[float, float] | None:
+    """(used, total) system RAM in MB. On Jetson the GPU shares this memory, so it is the runtime footprint."""
+    match = _RAM.search(line)
+    return (float(match.group("used")), float(match.group("total"))) if match else None
+
+
+def system_ram_used_mb() -> float | None:
+    """RAM in use now (same notion as tegrastats/free: total - free - buffers - cache). Linux only."""
+    try:
+        info = {}
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            key, value = line.split(":", 1)
+            info[key] = float(value.split()[0]) / 1024.0
+        return info["MemTotal"] - info["MemFree"] - info["Buffers"] - info["Cached"] - info.get("SReclaimable", 0.0)
+    except (OSError, KeyError, ValueError):
+        return None
+
+
 class TegrastatsMonitor:
     def __init__(self, interval_ms: int = 100, log_path: Path | None = None) -> None:
         self.interval_ms = interval_ms
         self.log_path = log_path
         self.available = shutil.which("tegrastats") is not None
         self.samples: list[float] = []
+        self.ram_samples: list[float] = []
         self.rail: str | None = None
         self._process = None
         self._thread = None
@@ -53,6 +73,9 @@ class TegrastatsMonitor:
             for line in self._process.stdout:
                 if log:
                     log.write(line)
+                ram = parse_ram_mb(line)
+                if ram:
+                    self.ram_samples.append(ram[0])
                 parsed = parse_power_mw(line)
                 if parsed:
                     self.rail, value = parsed
@@ -76,4 +99,14 @@ class TegrastatsMonitor:
             "samples": len(self.samples),
             "mean_mw": sum(self.samples) / len(self.samples),
             "max_mw": max(self.samples),
+        }
+
+    def memory_summary(self) -> dict | None:
+        if not self.ram_samples:
+            return None
+        return {
+            "samples": len(self.ram_samples),
+            "first_ram_mb": self.ram_samples[0],
+            "peak_ram_mb": max(self.ram_samples),
+            "mean_ram_mb": sum(self.ram_samples) / len(self.ram_samples),
         }

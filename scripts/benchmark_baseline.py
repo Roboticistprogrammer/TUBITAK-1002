@@ -23,7 +23,7 @@ from bootstrap import setup_path
 
 ROOT = setup_path()
 
-from firecls.baselines.power import TegrastatsMonitor
+from firecls.baselines.power import TegrastatsMonitor, system_ram_used_mb
 from firecls.baselines.preprocessing import input_size
 from firecls.baselines.registry import load_baseline
 from firecls.deployment.artifacts import git_commit, sha256_file, write_json
@@ -74,6 +74,9 @@ def time_runner(runner, size: int, batch_sizes: list[int], warmup: int, runs: in
         if power:
             entry["power"] = power
             entry["energy_mj_per_image"] = power["mean_mw"] * (mean_ms / batch) / 1000.0
+        memory = monitor.memory_summary()
+        if memory:
+            entry["memory"] = memory  # system-wide RAM (unified with the GPU on Jetson); run one runtime per process
         results[str(batch)] = entry
         print(f"  batch={batch}: {mean_ms:.2f} ms/batch, {entry['throughput_images_per_second']:.1f} img/s")
     return results
@@ -86,6 +89,7 @@ def manifest_size(artifact: Path) -> int:
 
 def main() -> None:
     args = parse_args()
+    idle_ram_mb = system_ram_used_mb()  # before anything is loaded; footprint = memory.peak_ram_mb - idle_ram_mb
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     runners: dict[str, tuple] = {}
     model_info: dict = {}
@@ -124,6 +128,7 @@ def main() -> None:
             "torch": torch.__version__,
             "cuda_runtime": torch.version.cuda,
             "device": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu",
+            "idle_ram_used_mb": idle_ram_mb,
         },
         "runtimes": {},
     }

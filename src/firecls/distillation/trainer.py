@@ -69,7 +69,10 @@ class MultiTeacherDistillationTrainer:
         total = 0
 
         progress = tqdm(loader, desc=f"Epoch {epoch}")
-        for images, labels in progress:
+        for batch in progress:
+            # Plain loaders yield (images, labels); a domain-tagged loader yields (images, labels, domain_ids).
+            images, labels, *rest = batch
+            domain_ids = rest[0].to(self.device) if rest else None
             images = images.to(self.device)
             labels = labels.to(self.device)
 
@@ -84,7 +87,7 @@ class MultiTeacherDistillationTrainer:
                     teacher_logits_list.append(teacher_logits)
 
             loss, hard_loss, soft_loss = self.distillation_loss(
-                student_logits, teacher_logits_list, labels
+                student_logits, teacher_logits_list, labels, domain_ids=domain_ids
             )
 
             optimizer.zero_grad()

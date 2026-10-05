@@ -17,7 +17,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a target-specific TensorRT engine with trtexec.")
     parser.add_argument("--onnx", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=Path("artifacts/student_fp16.engine"))
-    parser.add_argument("--precision", choices=["fp32", "fp16"], default="fp16")
+    parser.add_argument("--precision", choices=["fp32", "fp16", "int8"], default="fp16")
+    parser.add_argument("--calib-cache", type=Path, help="INT8 calibration cache from scripts/pipeline/04a_make_int8_calibration.py")
     parser.add_argument("--min-batch", type=int, default=1)
     parser.add_argument("--opt-batch", type=int, default=8)
     parser.add_argument("--max-batch", type=int, default=16)
@@ -54,6 +55,10 @@ def main() -> None:
     ]
     if args.precision == "fp16":
         command.append("--fp16")
+    if args.precision == "int8":
+        if args.calib_cache is None or not args.calib_cache.exists():
+            raise SystemExit("--precision int8 needs --calib-cache (build one with scripts/pipeline/04a_make_int8_calibration.py).")
+        command += ["--int8", "--fp16", f"--calib={args.calib_cache}"]  # fp16 fallback for layers without an int8 kernel
     subprocess.run(command, check=True)
 
     version = subprocess.run([trtexec, "--version"], check=True, text=True, capture_output=True)
@@ -69,6 +74,7 @@ def main() -> None:
         "input": manifest["input"],
         "output": manifest["output"],
         "precision": args.precision,
+        "calibration_cache_sha256": sha256_file(args.calib_cache) if args.calib_cache else None,
         "profile": {
             "min_batch": args.min_batch,
             "opt_batch": args.opt_batch,

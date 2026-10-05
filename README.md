@@ -1,3 +1,19 @@
+## TODO (branch: retrain-pipeline) - start here for the thesis retraining
+
+This branch is `baselines/common` + `baseline/cnn-classifiers` (no-KD ablation) + the domain-routed distillation
+(issue 2.2) + a numbered pipeline in [`scripts/pipeline/`](scripts/pipeline/README.md) covering training (00), ONNX export
+(01), per-image prediction dumps (02), Jetson environment/engine/benchmark/DeepStream scripts (03-07) and the statistics
+(08). Do the steps in order; the pipeline README says which machine each one is for.
+
+1. Main machine (GPU): `scripts/pipeline/00_train_students.sh` (9 student runs, 3 seeds, 20 epochs each, teachers reused;
+   do not interrupt, the previous student stopped at epoch 11), then `01`, then `02` for every checkpoint and the 3 teachers.
+2. Jetson: close the browser, then `03` -> `04` -> `02` on the engines -> `05` -> `06` -> `07`.
+3. `08_compute_statistics.py` on all `preds/*`, then fill the `\tbd` cells in the thesis (`Sections/Results.tex`).
+
+Unit tests: `PYTHONPATH=src python -m pytest tests`.
+
+---
+
 # Fire Classification with SwinV2-L Teachers
 
 > **Baseline comparison (Results chapter).** The shared protocol for comparing the distilled
