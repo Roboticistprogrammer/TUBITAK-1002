@@ -1,0 +1,35 @@
+{
+  "name": "teacher_rs",
+  "runtime": "pytorch",
+  "split": "test",
+  "classes": [
+    "fire",
+    "smoke",
+    "both",
+    "neither"
+  ],
+  "counts": {
+    "cv": 15884,
+    "rs": 370,
+    "uav": 4181
+  },
+  "artifact": "outputs\\teachers\\FASDD_RS\\best.pt",
+  "artifact_sha256": "a325443cec5cf8e5c9713269a64f26fce05006e3d2a75e67c96cbf8b67a8713a",
+  "img_size": 192,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "limit": null,
+  "seconds": 305.7,
+  "created": "2026-10-13T18:13:32.001376+00:00",
+  "git_commit": "ede7415fbadd1499046a9cd439b9a40fea538961",
+  "torch": "2.14.1+cu130",
+  "device": "NVIDIA GeForce RTX 3070"
+}
