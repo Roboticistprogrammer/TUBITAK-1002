@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import torch
@@ -111,7 +112,8 @@ def main() -> None:
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     criterion = nn.CrossEntropyLoss()
-    scaler = torch.cuda.amp.GradScaler(enabled=args.amp)
+    use_amp = args.amp and device.type == "cuda"
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
     start_epoch = 0
     best_val = 0.0
@@ -124,6 +126,10 @@ def main() -> None:
         best_val = checkpoint.get("best_val", 0.0)
 
     history = []
+    history_path = output_dir / "history.json"
+    if start_epoch > 0 and history_path.exists():
+        previous = json.loads(history_path.read_text(encoding="utf-8")).get("records", [])
+        history = [r for r in previous if r["epoch"] < start_epoch]
 
     for epoch in range(start_epoch, args.epochs):
         model.train()
@@ -136,7 +142,7 @@ def main() -> None:
             images, labels = to_device((images, labels), device)
             optimizer.zero_grad(set_to_none=True)
 
-            with torch.cuda.amp.autocast(enabled=args.amp):
+            with torch.amp.autocast(device.type, enabled=use_amp):
                 outputs = model(images)
                 loss = criterion(outputs.logits, labels)
 
@@ -165,6 +171,10 @@ def main() -> None:
 
         save_json(output_dir / "history.json", {"records": history})
 
+        is_best = val_acc > best_val
+        if is_best:
+            best_val = val_acc
+
         checkpoint = {
             "epoch": epoch,
             "model": model.state_dict(),
@@ -175,8 +185,7 @@ def main() -> None:
         }
         torch.save(checkpoint, output_dir / "last.pt")
 
-        if val_acc > best_val:
-            best_val = val_acc
+        if is_best:
             torch.save(checkpoint, output_dir / "best.pt")
 
         print(f"Epoch {epoch+1}: train_loss={train_loss:.4f} train_acc={train_acc:.4f} val_acc={val_acc:.4f}")
