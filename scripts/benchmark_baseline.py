@@ -37,6 +37,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--checkpoint", type=Path, help="PyTorch checkpoint (optional on Jetson)")
     parser.add_argument("--onnx", type=Path)
     parser.add_argument("--engine", type=Path)
+    parser.add_argument("--onnx-cpu", action="store_true", help="force ONNX Runtime onto the CPU provider")
     parser.add_argument("--batch-sizes", type=int, nargs="+", default=[1, 4, 8])
     parser.add_argument("--warmup", type=int, default=20)
     parser.add_argument("--runs", type=int, default=200)
@@ -104,7 +105,7 @@ def main() -> None:
         runners["pt"] = (PyTorchRunner(loaded.model, device), args.checkpoint)
     if args.onnx:
         size = size or manifest_size(args.onnx)
-        runners["onnx"] = (OnnxRuntimeRunner(args.onnx, use_cuda=device.type == "cuda"), args.onnx)
+        runners["onnx"] = (OnnxRuntimeRunner(args.onnx, use_cuda=device.type == "cuda" and not args.onnx_cpu), args.onnx)
     if args.engine:
         size = size or manifest_size(args.engine)
         runners["engine"] = (TensorRTRunner(args.engine, device), args.engine)
@@ -140,6 +141,9 @@ def main() -> None:
             "artifact_mib": artifact.stat().st_size / 1024**2,
             "batches": time_runner(runner, size, args.batch_sizes, args.warmup, args.runs, log_dir),
         }
+        if hasattr(runner, "providers"):
+            payload["runtimes"][runtime]["onnxruntime_providers"] = runner.providers
+            payload["runtimes"][runtime]["onnxruntime_version"] = __import__("onnxruntime").__version__
     write_json(args.output, payload)
     print(f"Saved: {args.output}")
 
