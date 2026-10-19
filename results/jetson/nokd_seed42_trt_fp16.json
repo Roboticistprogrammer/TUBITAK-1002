@@ -1,0 +1,58 @@
+{
+  "baseline": {
+    "name": "nokd_seed42_trt_fp16",
+    "family": "swinv2"
+  },
+  "protocol": {
+    "input": [
+      3,
+      192,
+      192
+    ],
+    "warmup_runs": 20,
+    "timed_runs": 100,
+    "timing_scope": "runtime infer call incl. H2D/D2H transfer; preprocessing excluded",
+    "git_commit": "02786f616415764b5a6212efdb9ab57ee4db28cd"
+  },
+  "environment": {
+    "platform": "Linux-5.15.148-tegra-aarch64-with-glibc2.35",
+    "python": "3.10.12",
+    "torch": "2.9.0+cu126",
+    "cuda_runtime": "12.6",
+    "device": "Orin",
+    "idle_ram_used_mb": 4128.3828125
+  },
+  "runtimes": {
+    "engine": {
+      "artifact": "artifacts/engines/nokd_seed42_fp16.engine",
+      "artifact_sha256": "6e5a07034656da5defdbf019018730d5d04cc897e7a93b47cb3828185ffeba47",
+      "artifact_mib": 173.6677131652832,
+      "batches": {
+        "1": {
+          "batch_size": 1,
+          "runs": 100,
+          "mean_batch_ms": 12.418330710015653,
+          "p50_batch_ms": 11.78096850003385,
+          "p95_batch_ms": 17.063703799976793,
+          "p99_batch_ms": 19.480037340381386,
+          "std_batch_ms": 1.6576958640852246,
+          "mean_ms_per_image": 12.418330710015653,
+          "throughput_images_per_second": 80.52612088945887,
+          "power": {
+            "rail": "VDD_IN",
+            "samples": 11,
+            "mean_mw": 12373.90909090909,
+            "max_mw": 14645.0
+          },
+          "energy_mj_per_image": 153.66329526657822,
+          "memory": {
+            "samples": 11,
+            "first_ram_mb": 4461.0,
+            "peak_ram_mb": 4461.0,
+            "mean_ram_mb": 4461.0
+          }
+        }
+      }
+    }
+  }
+}
