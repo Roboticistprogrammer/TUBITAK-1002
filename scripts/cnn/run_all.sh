@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# CNN classifier baselines + no-KD SwinV2-B ablation: 3 architectures x 3 seeds.
+# CNN classifier baselines (ResNet-50, MobileNetV3-Large) x 3 seeds.
+# The no-KD SwinV2-B ablation is trained by the retrain-pipeline branch
+# (scripts/pipeline/00_train_students.sh, student batch size 8); it is still selectable here
+# with ARCHES="swinv2_base_nokd" BATCH=8, but is not run by default.
 #
 #   train -> export ONNX -> [TensorRT FP16] -> evaluate (test) -> benchmark
 #
@@ -14,7 +17,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 PY=${PYTHON:-python3}
-ARCHES=${ARCHES:-"resnet50 mobilenet_v3_large swinv2_base_nokd"}
+ARCHES=${ARCHES:-"resnet50 mobilenet_v3_large"}
 SEEDS=${SEEDS:-"42 43 44"}
 EPOCHS=${EPOCHS:-20}
 BATCH=${BATCH:-16}

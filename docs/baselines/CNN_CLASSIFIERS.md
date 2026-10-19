@@ -8,7 +8,10 @@ Branch: `baseline/cnn-classifiers` (built on `baselines/common`; protocol in `do
 |---|---|---|---|
 | `resnet50` | torchvision ResNet-50 (23.5 M params with the 4-way head) | ImageNet-1k V2 | accuracy-oriented CNN reference (He et al., 2016) |
 | `mobilenet_v3_large` | torchvision MobileNetV3-Large (4.2 M params with the 4-way head) | ImageNet-1k V2 | edge-oriented CNN reference (Howard et al., 2019) |
-| `swinv2_base_nokd` | the student's SwinV2-B, identical recipe, cross-entropy only | ImageNet-22k (Hugging Face) | **ablation**: isolates the contribution of multi-teacher KD |
+| `swinv2_base_nokd` | the student's SwinV2-B, identical recipe, cross-entropy only | ImageNet-22k (Hugging Face) | **ablation**: isolates the contribution of multi-teacher KD. Trained on the `retrain-pipeline` branch (batch 8, matching the student), not by this branch's default run |
+
+`scripts/cnn/run_all.sh` trains only the two CNNs by default. The no-KD option is kept in
+`train_classifier.py` because `retrain-pipeline` uses it to train the ablation.
 
 The `swinv2_base_nokd` row is the most important one for the thesis argument: it differs from
 the proposed student *only* in the training objective (no teacher soft targets), so the gap
