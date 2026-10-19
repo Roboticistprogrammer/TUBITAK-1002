@@ -61,7 +61,10 @@ def main() -> None:
         command += ["--int8", "--fp16", f"--calib={args.calib_cache}"]  # fp16 fallback for layers without an int8 kernel
     subprocess.run(command, check=True)
 
-    version = subprocess.run([trtexec, "--version"], check=True, text=True, capture_output=True)
+    # TensorRT 10.x trtexec rejects --version (exit 1) but still prints "[TensorRT v100300]" in its output.
+    probe = subprocess.run([trtexec, "--version"], text=True, capture_output=True)
+    version_lines = [line for line in (probe.stdout + probe.stderr).splitlines() if "TensorRT v" in line]
+    trtexec_version = version_lines[-1].strip() if version_lines else (probe.stdout + probe.stderr).strip()
     engine_manifest = {
         "artifact": str(args.output),
         "artifact_sha256": sha256_file(args.output),
@@ -80,7 +83,7 @@ def main() -> None:
             "opt_batch": args.opt_batch,
             "max_batch": args.max_batch,
         },
-        "trtexec_version": (version.stdout + version.stderr).strip(),
+        "trtexec_version": trtexec_version,
         "portability_warning": "Rebuild on each target GPU/platform with this pinned container.",
     }
     output_manifest = args.output.with_suffix(args.output.suffix + ".manifest.json")
