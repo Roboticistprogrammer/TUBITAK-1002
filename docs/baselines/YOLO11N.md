@@ -1,24 +1,32 @@
-# YOLO baseline: lightweight detectors after Vazquez et al. (2025)
+# YOLO baseline: YOLO11n reference detector
 
-Branch `baseline/yolo-vazquez`. Provenance marker in the results table: **reimplemented (†)**:
-the detectors are the official Ultralytics implementations, while the protocol around them is
-adapted to the image-level task of this thesis.
+Branch `baseline/yolo11n` (formerly `baseline/yolo-vazquez`). Provenance marker in the results
+table: **official**: YOLO11n is the unmodified Ultralytics implementation; only the image-level
+decision rule and the training protocol around it are ours (§2).
 
-Reference: Vazquez, Zhai and Yang, arXiv:2501.08639 (2025); Sensors 26 (2026),
-doi:10.3390/s26103197.
+## 1. What this baseline is, and why YOLO11n
 
-## 1. What is reproduced
-
-* **Models.** The three nano-scale Ultralytics detectors YOLOv5n, YOLOv8n and YOLO11n.
-* **Initialisation study.** Each model is trained twice, fine-tuned from the official MS COCO
-  checkpoint (transfer learning) and from random initialisation (scratch). Both are reported.
-* **Training pipeline.** Unmodified Ultralytics training (augmentation, loss, schedule, EMA,
-  checkpoint selection), with library defaults except for the protocol budget (§4).
+* **Role.** The reference for one-stage detectors, the family most used in published FASDD
+  experiments: the dataset authors report YOLOv5x (Wang et al., 2025); EFSD-YOLO and SFGI-YOLO
+  (both 2025) are modified YOLOv11 models; Vazquez et al. (2025) use nano YOLO detectors for
+  edge wildfire detection.
+* **Why the base model and not a published variant.** EFSD-YOLO and SFGI-YOLO have no public
+  code, so reimplementing their modules from the papers would make any gap ambiguous
+  (method vs. reimplementation). Both report gains of about 1-2 points over their YOLOv11 base,
+  so the base model represents the family closely. Custom modules may also not export cleanly
+  to ONNX/TensorRT, which would confound the edge measurements.
+* **Why nano.** It is the size intended for edge deployment, which is the thesis setting.
+* **Configuration.** YOLO11n fine-tuned from the official MS COCO checkpoint, seeds 42/43/44.
+  Unmodified Ultralytics training pipeline (augmentation, loss, schedule, EMA, checkpoint
+  selection) with library defaults except for the protocol budget (§4).
 * **Edge metrics.** Latency, throughput and, on Jetson, power, measured by the shared
   `scripts/benchmark_baseline.py` on the same runtimes (PyTorch, ONNX Runtime, TensorRT FP16)
   as the distilled student.
 * **Detector quality.** Precision, recall, mAP50 and mAP50-95 per domain on the test split
-  (`scripts/yolo/detection_metrics.py`). These form a secondary table.
+  (`scripts/yolo/detection_metrics.py`), as a secondary table.
+
+The earlier grid (YOLOv5nu / YOLOv8n / YOLO11n x COCO / scratch) is still available through
+`ARCHES` and `INITS` (§5) but is not part of the thesis comparison.
 
 ## 2. What is adapted, and why
 
@@ -34,9 +42,9 @@ doi:10.3390/s26103197.
    the committed `data_index/*.csv` (identical to the student and every other baseline). Only
    the boxes come from the FASDD annotation files. The preparation script checks that the label
    implied by the boxes equals the CSV label, and fails above 1 % disagreement per domain.
-3. **No FASDD-pretrained weights.** Vazquez et al. publish weights trained on FASDD. They are
-   deliberately not used, because they may have been trained on images in our test split (leakage).
-   All runs start from COCO or from scratch.
+3. **No FASDD-pretrained weights.** Publicly released FASDD-trained YOLO weights (e.g. those of
+   Vazquez et al.) are deliberately not used, because they may have been trained on images in
+   our test split (leakage). All runs start from the COCO checkpoint.
 4. **Input geometry.** Detectors keep their native 640 × 640 letterbox input (0–1 RGB, grey
    padding 114, no mean/std). Down-scaling to the student's 192 px would disadvantage a
    detector, so latency is reported at each method's native input size. NMS is not part of the
@@ -46,16 +54,16 @@ doi:10.3390/s26103197.
    releases used 0.1·mAP50 + 0.9·mAP50-95). It is **not** the protocol's equal-weight mean
    validation accuracy, and on the combined set CV images are about 78 % of the validation
    images. Changing this would require modifying the Ultralytics trainer, which would no longer
-   be the library pipeline that Vazquez et al. evaluate. The image-level thresholds are then
+   be the unmodified library pipeline. The image-level thresholds are then
    calibrated on validation only. The test split is never used for any choice.
-6. **YOLOv5n is `yolov5nu`.** Ultralytics distributes only the *anchor-free* YOLOv5 variant
+6. **(Optional grid only) YOLOv5n is `yolov5nu`.** Ultralytics distributes only the *anchor-free* YOLOv5 variant
    ("u": v5 backbone and neck with the v8 decoupled, DFL-based head). It differs from the original
    anchor-based YOLOv5n of the `ultralytics/yolov5` repository. State this wherever "YOLOv5n"
    appears in the thesis.
 7. **Optimizer (fixed explicitly).** Ultralytics' `optimizer=auto` depends on the library
    version: with our data (61,323 training images, nominal batch 64, 20 epochs, about 19,180
-   iterations, which is over 10,000), ultralytics 8.4.164 resolves it to **MuSGD**, whereas the
-   releases contemporary with Vazquez et al. resolved the same case to **SGD** (lr 0.01,
+   iterations, which is over 10,000), ultralytics 8.4.164 resolves it to **MuSGD**, whereas earlier
+   releases resolved the same case to **SGD** (lr 0.01,
    momentum 0.9). `run_all.sh` therefore passes `--optimizer SGD --lr0 0.01 --momentum 0.9` by
    default, so results do not depend on the installed Ultralytics version. Override with
    `TRAIN_ARGS=...` if needed; the optimizer actually used is recorded in `train_summary.json`
@@ -116,22 +124,24 @@ python scripts/yolo/prepare_fasdd_yolo.py \
 #    for YOLO label dirs without classes.txt add: --yolo-class-names fire smoke
 
 # 2. one cell of the grid
-python scripts/yolo/train_yolo.py --arch yolov8n --init coco --seed 42 --device 0
-CKPT=outputs/baselines/yolo/yolov8n_coco/seed42/weights/best.pt
+python scripts/yolo/train_yolo.py --arch yolo11n --init coco --seed 42 --device 0
+CKPT=outputs/baselines/yolo/yolo11n_coco/seed42/weights/best.pt
 python scripts/yolo/calibrate_thresholds.py --checkpoint $CKPT
 python scripts/export_baseline.py --family yolo --checkpoint $CKPT \
-    --output artifacts/baselines/yolov8n_coco_seed42.onnx
-python scripts/evaluate_baseline.py --family yolo --name yolov8n_coco_seed42 --checkpoint $CKPT \
-    --onnx artifacts/baselines/yolov8n_coco_seed42.onnx \
-    --output results/baselines/yolov8n_coco_seed42_eval.json
-python scripts/yolo/detection_metrics.py --name yolov8n_coco_seed42 --checkpoint $CKPT \
-    --output results/baselines/yolov8n_coco_seed42_detection.json
-python scripts/benchmark_baseline.py --family yolo --name yolov8n_coco_seed42 --checkpoint $CKPT \
-    --onnx artifacts/baselines/yolov8n_coco_seed42.onnx \
-    --output results/baselines/yolov8n_coco_seed42_bench.json
+    --output artifacts/baselines/yolo11n_coco_seed42.onnx
+python scripts/evaluate_baseline.py --family yolo --name yolo11n_coco_seed42 --checkpoint $CKPT \
+    --onnx artifacts/baselines/yolo11n_coco_seed42.onnx \
+    --output results/baselines/yolo11n_coco_seed42_eval.json
+python scripts/yolo/detection_metrics.py --name yolo11n_coco_seed42 --checkpoint $CKPT \
+    --output results/baselines/yolo11n_coco_seed42_detection.json
+python scripts/benchmark_baseline.py --family yolo --name yolo11n_coco_seed42 --checkpoint $CKPT \
+    --onnx artifacts/baselines/yolo11n_coco_seed42.onnx \
+    --output results/baselines/yolo11n_coco_seed42_bench.json
 
-# or the whole grid (3 archs x {coco, scratch} x seeds 42-44), resumable:
+# or all three seeds of YOLO11n (COCO init), resumable:
 CV_BOXES=... RS_BOXES=... UAV_BOXES=... DEVICE=0 scripts/yolo/run_all.sh
+# optional earlier grid, not used in the thesis:
+ARCHES="yolov5n yolov8n yolo11n" INITS="coco scratch" scripts/yolo/run_all.sh
 BUILD_ENGINE=1 scripts/yolo/run_all.sh     # additionally build + evaluate TensorRT FP16 engines
 ```
 
@@ -157,38 +167,40 @@ artifacts/baselines/<arch>_<init>_seed<k>.onnx(.manifest.json)
 results/baselines/<arch>_<init>_seed<k>_{eval,detection,bench}.json
 ```
 
-Row names follow `<arch>_<init>_seed<k>`, e.g. `yolov8n_coco_seed42`. They are aggregated over seeds as
+Row names follow `<arch>_<init>_seed<k>`, e.g. `yolo11n_coco_seed42`. They are aggregated over seeds as
 mean ± sample std by `scripts/collect_results_table.py`.
 
 ## 7. Methods paragraph (LaTeX)
 
 ```latex
-\paragraph{Lightweight detector baselines.}
-Following \citet{vazquez2025}, we include three nano-scale single-stage detectors from the
-Ultralytics framework, YOLOv5n, YOLOv8n and YOLO11n, and train each of them under two
-initialisation regimes: transfer learning from the official MS~COCO weights and training from
-random initialisation. For YOLOv5n we use the anchor-free variant distributed by Ultralytics
-(\texttt{yolov5nu}), which shares the YOLOv5 backbone but employs the decoupled, distribution-focal
-detection head of YOLOv8, and therefore differs from the original anchor-based model. The
-detectors are trained on the fire and smoke bounding boxes of the FASDD computer-vision,
-remote-sensing and UAV subsets, restricted to the training images of the fixed image-level
-partition used for all methods in this work, for 20 epochs with a batch size of 16 at the native
-input resolution of $640 \times 640$ pixels; all remaining hyper-parameters follow the library
-defaults of Ultralytics~8.4.164. Publicly released FASDD-trained weights are deliberately not used,
-as they may have been exposed to images of our test partition. Because the present task is
-image-level classification, each detector is converted into a four-way classifier by a
-deterministic decision rule: the presence probability of each class is taken as the maximum
-class confidence over all candidate boxes prior to non-maximum suppression, and an image is
-assigned to \emph{fire}, \emph{smoke}, \emph{both} or \emph{neither} by comparing the two presence
-probabilities with class-specific thresholds. The thresholds are selected by grid search on the
-validation partition so as to maximise the macro-averaged $F_1$ score averaged with equal weight
-over the three domains, and are embedded in the exported inference graph. Checkpoint selection
-relies on the detection fitness computed by the Ultralytics trainer on the combined validation
-set, rather than on the image-level validation accuracy used for the other baselines; the test
-partition is used exclusively for the final evaluation. Each configuration is trained with three
-random seeds, and results are reported as mean and sample standard deviation.
+\paragraph{Detector baseline.}
+One-stage YOLO detectors are the approach most frequently evaluated on FASDD: the dataset
+authors report results for YOLOv5x~\cite{wang2025fasdd}, EFSD-YOLO~\cite{efsdyolo2025} and
+SFGI-YOLO~\cite{sfgiyolo2025} are modified YOLOv11 models, and \citet{vazquez2025} employ nano
+YOLO detectors for edge-based wildfire detection. YOLO11n~\cite{ultralytics_yolo11} is used as the
+representative of this family. It is the common base of the recent FASDD-specific variants, for
+which no public implementation is available and which report gains of one to two points over
+their base model; reproducing their modules from the publications alone would make any
+difference in performance difficult to attribute. The nano variant was chosen because it is the
+model size intended for edge deployment. YOLO11n was fine-tuned from the official MS~COCO
+weights on the fire and smoke bounding boxes of the FASDD computer-vision, remote-sensing and UAV
+subsets, restricted to the training images of the fixed image-level partition used for all
+methods in this work, for 20 epochs with a batch size of 16 at its native input resolution of
+$640 \times 640$ pixels; all remaining hyper-parameters follow the defaults of Ultralytics~8.4.164,
+except that stochastic gradient descent (learning rate $0.01$, momentum $0.9$) was set explicitly.
+Publicly released FASDD-trained weights were not used, as they may have been exposed to images of
+the test partition. Because the present task is image-level classification, the detector is
+converted into a four-way classifier by a deterministic decision rule: the presence probability of
+each class is the maximum class confidence over all candidate boxes prior to non-maximum
+suppression, and an image is assigned to \emph{fire}, \emph{smoke}, \emph{both} or \emph{neither}
+by comparing the two presence probabilities with class-specific thresholds. The thresholds are
+selected by grid search on the validation partition to maximise the macro-averaged $F_1$ score,
+averaged with equal weight over the three domains, and are embedded in the exported inference
+graph. Checkpoint selection relies on the detection fitness computed by the Ultralytics trainer
+on the combined validation set; the test partition is used exclusively for the final evaluation.
+The detector is trained with three random seeds, and results are reported as mean and sample
+standard deviation.
 ```
 
-The citation key `vazquez2025` is a placeholder. Before finalising the text, check the paragraph
-against the published Sensors article, in particular any statement about the original training
-schedule, which this branch did not re-read.
+The citation keys are placeholders. Verify the EFSD-YOLO and SFGI-YOLO bibliographic details
+and the Ultralytics YOLO11 software citation before finalising the text.

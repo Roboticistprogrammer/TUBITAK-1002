@@ -1,7 +1,10 @@
-"""Ultralytics YOLO detectors (YOLOv5nu / YOLOv8n / YOLO11n) reduced to image-level scores.
+"""Ultralytics YOLO detectors reduced to image-level scores (thesis baseline: YOLO11n).
 
-Adaptation of Vazquez et al. (2025): the detectors are trained on FASDD fire/smoke boxes, and
-the image-level label is derived from their dense predictions without NMS:
+YOLO11n is the reference for the one-stage detector family most used on FASDD (the base of
+EFSD-YOLO and SFGI-YOLO; YOLO detectors in Vazquez et al., 2025). It is the unmodified
+Ultralytics implementation trained on FASDD fire/smoke boxes; only the decision rule around it
+is ours. YOLOv5nu and YOLOv8n remain selectable but are not part of the thesis comparison.
+The image-level label is derived from the dense predictions without NMS:
 
     p_fire  = max over all anchors of the fire class probability
     p_smoke = max over all anchors of the smoke class probability
@@ -30,7 +33,7 @@ import torch
 
 from firecls.baselines.boxes import canonical_class
 from firecls.baselines.preprocessing import letterbox_spec
-from firecls.baselines.protocol import CLASSES, SOURCE_REIMPLEMENTED
+from firecls.baselines.protocol import CLASSES, SOURCE_OFFICIAL
 from firecls.baselines.registry import LoadedBaseline, register_family
 from firecls.baselines.scores import PresenceToScores
 from firecls.deployment.artifacts import sha256_file
@@ -41,7 +44,7 @@ THRESHOLDS_FILE = "thresholds.json"
 DEFAULT_THRESHOLD = 0.5
 
 # CLI architecture key -> Ultralytics weight stem (COCO init) and model yaml (scratch init).
-# Ultralytics only distributes the anchor-free "u" variant of YOLOv5, see docs/baselines/YOLO_VAZQUEZ.md.
+# Ultralytics only distributes the anchor-free "u" variant of YOLOv5, see docs/baselines/YOLO11N.md.
 ARCHITECTURES: dict[str, dict[str, str]] = {
     "yolov5n": {"weights": "yolov5nu.pt", "yaml": "yolov5nu.yaml"},
     "yolov8n": {"weights": "yolov8n.pt", "yaml": "yolov8n.yaml"},
@@ -180,7 +183,7 @@ def load(checkpoint: Path, device) -> LoadedBaseline:
         "model_name": run["model_name"],
         "arch": run["arch"],
         "init": run["init"],
-        "source": SOURCE_REIMPLEMENTED,
+        "source": SOURCE_OFFICIAL,  # unmodified Ultralytics model; rule documented
         "thresholds": thresholds,
         "thresholds_calibrated": calibrated,
         "detector_classes": list(DETECTOR_CLASSES),

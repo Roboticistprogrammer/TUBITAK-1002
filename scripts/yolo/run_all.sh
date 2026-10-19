@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Full YOLO baseline grid (Vazquez et al. 2025, adapted): 3 architectures x {coco, scratch} x 3 seeds.
+# YOLO11n reference baseline: COCO-initialised YOLO11n x 3 seeds (docs/baselines/YOLO11N.md).
 #
 #   prepare (once) -> train -> calibrate (val) -> export ONNX -> [TensorRT FP16] -> evaluate (test)
 #   -> detection mAP (test) -> benchmark
@@ -10,14 +10,16 @@
 #
 # Usage (from anywhere; all variables are optional overrides):
 #   CV_BOXES=... RS_BOXES=... UAV_BOXES=... DEVICE=0 scripts/yolo/run_all.sh
-#   ARCHES="yolov8n" INITS="coco" SEEDS="42" scripts/yolo/run_all.sh     # a single cell
+#   SEEDS="42" scripts/yolo/run_all.sh                                   # one seed only
 #   BUILD_ENGINE=1 scripts/yolo/run_all.sh                               # also build/evaluate TensorRT
+# Optional, not part of the thesis comparison: the earlier nano-detector / initialisation grid
+#   ARCHES="yolov5n yolov8n yolo11n" INITS="coco scratch" scripts/yolo/run_all.sh
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 PY=${PYTHON:-python3}
-ARCHES=${ARCHES:-"yolov5n yolov8n yolo11n"}
-INITS=${INITS:-"coco scratch"}
+ARCHES=${ARCHES:-"yolo11n"}
+INITS=${INITS:-"coco"}
 SEEDS=${SEEDS:-"42 43 44"}
 EPOCHS=${EPOCHS:-20}
 BATCH=${BATCH:-16}

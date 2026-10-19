@@ -1,6 +1,6 @@
-"""Train one Ultralytics detector of the Vazquez et al. (2025) grid on FASDD fire/smoke boxes.
+"""Train one Ultralytics detector on FASDD fire/smoke boxes (thesis baseline: YOLO11n, COCO init).
 
-    python scripts/yolo/train_yolo.py --arch yolov8n --init coco --seed 42 --device 0
+    python scripts/yolo/train_yolo.py --arch yolo11n --init coco --seed 42 --device 0
 
 ``--init coco`` fine-tunes the official MS COCO checkpoint (``yolov5nu.pt``, ``yolov8n.pt``,
 ``yolo11n.pt``; the 80-class head is replaced by a 2-class head); ``--init scratch`` builds the

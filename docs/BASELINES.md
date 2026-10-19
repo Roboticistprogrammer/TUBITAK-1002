@@ -7,7 +7,7 @@ each baseline lives on its own branch that starts from it.
 | Branch | Method | Literature link | Provenance |
 |---|---|---|---|
 | `baseline/cnn-classifiers` | ResNet-50, MobileNetV3-Large, SwinV2-B without KD | He et al. 2016; Howard et al. 2019; ablation of the proposed KD | official (torchvision / Hugging Face) |
-| `baseline/yolo-vazquez` | YOLOv5n / YOLOv8n / YOLO11n detectors, COCO-pretrained vs. scratch | Vazquez et al. 2025 | official library, protocol adapted (†) |
+| `baseline/yolo11n` | YOLO11n detector, COCO-pretrained | YOLO family on FASDD: Wang et al. 2025; EFSD-YOLO, SFGI-YOLO (2025); Vazquez et al. 2025 | official library, protocol adapted |
 | `baseline/pesonen-pidnet` | SAM box-prompted pseudo-masks → PIDNet-S student | Pesonen et al., WACV 2025 | reimplemented (†) |
 
 ## 1. Task definition
@@ -91,11 +91,11 @@ Report the JetPack/TensorRT version, power mode and that `jetson_clocks` was app
 
 ## 4. Threats to validity to state in the thesis
 
-* **Task adaptation.** Vazquez et al. and Pesonen et al. are detection/segmentation methods;
+* **Task adaptation.** YOLO11n and Pesonen et al. are detection/segmentation methods;
   they are evaluated here through the image-level decision rule of §1. This is stated as an
   adaptation, not a reproduction of their reported numbers.
-* **Pre-training leakage.** Vazquez et al. publish FASDD-pretrained YOLO weights. They are *not*
-  used: they may have seen FASDD test images. All YOLO runs start from COCO or from scratch.
+* **Pre-training leakage.** FASDD-pretrained YOLO weights are public (e.g. Vazquez et al.). They are *not*
+  used: they may have seen FASDD test images. All YOLO runs start from COCO.
 * **External data.** BoWFire is part of FASDD_CV's sources; do not use it as an external test set.
 * **Input geometry.** YOLO keeps its native 640 px letterbox input because down-scaling to 192
   would cripple a detector; latency is therefore reported at each method's native input size.

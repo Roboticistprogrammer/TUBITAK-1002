@@ -1,13 +1,13 @@
 """Box-level detector quality on each domain's TEST split (secondary table, not the main comparison).
 
-    python scripts/yolo/detection_metrics.py --name yolov8n_coco_seed42 \
-        --checkpoint outputs/baselines/yolo/yolov8n_coco/seed42/weights/best.pt \
-        --output results/baselines/yolov8n_coco_seed42_detection.json
+    python scripts/yolo/detection_metrics.py --name yolo11n_coco_seed42 \
+        --checkpoint outputs/baselines/yolo/yolo11n_coco/seed42/weights/best.pt \
+        --output results/baselines/yolo11n_coco_seed42_detection.json
 
 Runs Ultralytics ``val`` with its default settings (conf 0.001, NMS IoU 0.7, max_det 300,
 rectangular batches) on ``datasets_yolo/fasdd_<domain>.yaml`` with ``split=test`` and records
-precision, recall, mAP50 and mAP50-95, overall and per class. These are the metrics Vazquez et
-al. report; the image-level metrics of the main table come from ``scripts/evaluate_baseline.py``.
+precision, recall, mAP50 and mAP50-95, overall and per class. These are the metrics reported in
+the FASDD detection literature; the image-level metrics of the main table come from ``scripts/evaluate_baseline.py``.
 """
 from __future__ import annotations
 

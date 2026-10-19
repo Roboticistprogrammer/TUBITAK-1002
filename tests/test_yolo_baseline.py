@@ -1,4 +1,4 @@
-"""YOLO baseline (Vazquez et al. adaptation): wrapper, export, loader and dataset preparation.
+"""YOLO baseline (YOLO11n reference, image-level adaptation): wrapper, export, loader and dataset preparation.
 
 Runs on CPU without FASDD and without network: detectors are random-init ``yolov8n.yaml``
 models and the dataset is a synthetic FASDD-shaped tree written to a temporary directory.
@@ -239,7 +239,7 @@ class YoloLoaderTests(unittest.TestCase):
             meta = loaded.metadata
             self.assertEqual(meta["classes"], CLASSES)
             self.assertEqual(meta["model_name"], "yolov8n_coco")
-            self.assertEqual(meta["source"], "reimplemented")
+            self.assertEqual(meta["source"], "official")
             self.assertEqual(meta["thresholds"], {"t_fire": 0.5, "t_smoke": 0.5})
             self.assertFalse(meta["thresholds_calibrated"])
             self.assertEqual((meta["train_seed"], meta["epoch"]), (43, 3))
