@@ -1,0 +1,108 @@
+{
+  "protocol": {
+    "input": [
+      3,
+      192,
+      192
+    ],
+    "warmup_runs": 10,
+    "timed_runs": 50,
+    "timing_scope": "runtime infer call including tensor transfer and output synchronization; preprocessing excluded",
+    "git_commit": "82be2e07ba1807a31d06d0243b442125adddad5f"
+  },
+  "environment": {
+    "platform": "Windows-10-10.0.26100-SP0",
+    "python": "3.10.20",
+    "torch": "2.11.0+cu126",
+    "cuda_runtime": "12.6",
+    "device": "NVIDIA GeForce RTX 3070"
+  },
+  "model": {
+    "model_name": "microsoft/swinv2-base-patch4-window12-192-22k",
+    "classes": [
+      "fire",
+      "smoke",
+      "both",
+      "neither"
+    ],
+    "parameter_count": 86897916,
+    "inference_parameter_mib": 331.48924255371094,
+    "training_checkpoint_mib": 994.959584236145
+  },
+  "runtimes": {
+    "student_pt": {
+      "artifact": "Models\\students\\last.pt",
+      "artifact_sha256": "9c1617b5b9bd35359f66df829b9da9b70d78a396221d2b1b99a0c9374b0649a4",
+      "artifact_mib": 994.959584236145,
+      "batches": {
+        "1": {
+          "batch_size": 1,
+          "runs": 50,
+          "mean_batch_ms": 53.02337607368827,
+          "median_batch_ms": 53.00105037167668,
+          "p95_batch_ms": 67.99705512821674,
+          "std_batch_ms": 7.999388033659075,
+          "mean_ms_per_image": 53.02337607368827,
+          "throughput_images_per_second": 18.85960634815611
+        },
+        "4": {
+          "batch_size": 4,
+          "runs": 50,
+          "mean_batch_ms": 52.17995993793011,
+          "median_batch_ms": 51.65104987099767,
+          "p95_batch_ms": 63.545610290020704,
+          "std_batch_ms": 6.415708746856043,
+          "mean_ms_per_image": 13.044989984482527,
+          "throughput_images_per_second": 76.65778212091654
+        },
+        "8": {
+          "batch_size": 8,
+          "runs": 50,
+          "mean_batch_ms": 51.19016598910093,
+          "median_batch_ms": 51.232350058853626,
+          "p95_batch_ms": 60.15493958257139,
+          "std_batch_ms": 5.5782257450384956,
+          "mean_ms_per_image": 6.398770748637617,
+          "throughput_images_per_second": 156.2800167849291
+        }
+      }
+    },
+    "student_onnx": {
+      "artifact": "artifacts\\student.onnx",
+      "artifact_sha256": "31df1da241f3d622020dae4dc1036dbba71702997d141edbaedbd5336f16df82",
+      "artifact_mib": 333.4297819137573,
+      "batches": {
+        "1": {
+          "batch_size": 1,
+          "runs": 50,
+          "mean_batch_ms": 23.911907877773046,
+          "median_batch_ms": 22.41770038381219,
+          "p95_batch_ms": 32.437784876674414,
+          "std_batch_ms": 4.142933315629909,
+          "mean_ms_per_image": 23.911907877773046,
+          "throughput_images_per_second": 41.820167805578365
+        },
+        "4": {
+          "batch_size": 4,
+          "runs": 50,
+          "mean_batch_ms": 25.367484092712402,
+          "median_batch_ms": 24.00890039280057,
+          "p95_batch_ms": 31.321005104109645,
+          "std_batch_ms": 3.480560594319734,
+          "mean_ms_per_image": 6.341871023178101,
+          "throughput_images_per_second": 157.68217239758215
+        },
+        "8": {
+          "batch_size": 8,
+          "runs": 50,
+          "mean_batch_ms": 38.28715803101659,
+          "median_batch_ms": 38.07360026985407,
+          "p95_batch_ms": 39.72897497005761,
+          "std_batch_ms": 0.6810114771835452,
+          "mean_ms_per_image": 4.7858947538770735,
+          "throughput_images_per_second": 208.94734452526265
+        }
+      }
+    }
+  }
+}
