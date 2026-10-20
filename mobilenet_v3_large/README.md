@@ -21,4 +21,8 @@
 | mobilenet_v3_large_seed42 | TensorRT FP16 | 4 | 6.2 | 7.9 | 607.3 | 7410 | 12 | 4732 |
 | mobilenet_v3_large_seed42 | TensorRT FP16 | 8 | 7.5 | 8.6 | 1085.8 | 9443 | 9 | 4741 |
 
+## Figures and full metrics
+
+`figures/` holds the thesis figures (PDF for LaTeX, PNG at 300 dpi) and `metrics.md` / `metrics.json` (balanced accuracy, macro-F1 over present classes, fire / any-fire recall, false-alarm rate, bootstrap 95% CIs, McNemar tests against the SwinV2-B students, ONNX-vs-TensorRT disagreements, filename-prefix label check). Regenerate with `python scripts/plot_baseline_results.py`; pass `--arch-dir resnet50 --model resnet50_seed42 --label ResNet-50` for the next baseline.
+
 See the top-level README for the protocol and caveats.
