@@ -1,0 +1,40 @@
+# swinv2-b-students
+
+## Accuracy on the test dataset (20,435 images)
+
+| model | runtime | CV acc | UAV acc | RS acc | CV macro-F1 | UAV macro-F1 | RS macro-F1 |
+|---|---|---|---|---|---|---|---|
+| kd_routed_seed42 | ONNX Runtime (CPU) | 0.9182 | 0.9416 | 0.9000 | 0.9029 | 0.8948 | 0.6075 |
+| kd_routed_seed42 | TensorRT FP16 | 0.9181 | 0.9416 | 0.9000 | 0.9028 | 0.8948 | 0.6075 |
+| kd_uniform_seed42 | ONNX Runtime (CPU) | 0.9168 | 0.9514 | 0.8703 | 0.9047 | 0.9134 | 0.5986 |
+| kd_uniform_seed42 | TensorRT FP16 | 0.9169 | 0.9519 | 0.8703 | 0.9047 | 0.9138 | 0.5986 |
+| nokd_seed42 | ONNX Runtime (CPU) | 0.9105 | 0.9388 | 0.8838 | 0.8997 | 0.9015 | 0.6163 |
+| nokd_seed42 | TensorRT FP16 | 0.9104 | 0.9390 | 0.8865 | 0.8996 | 0.9017 | 0.6177 |
+
+## Latency / throughput on Jetson Orin
+
+| model | runtime | batch | p50 ms/batch | p95 ms/batch | img/s | mean power mW | mJ/img | peak RAM MB |
+|---|---|---|---|---|---|---|---|---|
+| kd_routed_seed42 | ORT CPU | 1 | 1022.3 | 1333.8 | 1.0 | 8202 | 8049 | 4514 |
+| kd_routed_seed42 | ORT CPU | 4 | 1798.7 | 2440.1 | 2.3 | 8749 | 3752 | 4520 |
+| kd_routed_seed42 | ORT CPU | 8 | 2201.4 | 2565.2 | 3.5 | 9094 | 2585 | 4462 |
+| kd_routed_seed42 | ORT CUDA | 1 | 34.9 | 36.1 | 28.5 | 15776 | 554 | 4595 |
+| kd_routed_seed42 | ORT CUDA | 4 | 91.1 | 91.6 | 43.9 | 18697 | 426 | 4618 |
+| kd_routed_seed42 | ORT CUDA | 8 | 165.5 | 169.1 | 48.2 | 19826 | 412 | 4894 |
+| kd_routed_seed42 | TensorRT FP16 | 1 | 11.8 | 14.7 | 81.1 | 12727 | 157 | 4468 |
+| kd_uniform_seed42 | ORT CPU | 1 | 331.2 | 1014.1 | 1.9 | 7913 | 4089 | 4439 |
+| kd_uniform_seed42 | ORT CPU | 4 | 1129.3 | 1283.3 | 3.5 | 8447 | 2432 | 4376 |
+| kd_uniform_seed42 | ORT CPU | 8 | 2226.7 | 2328.2 | 3.6 | 8549 | 2397 | 4499 |
+| kd_uniform_seed42 | ORT CUDA | 1 | 34.6 | 35.0 | 28.7 | 15851 | 553 | 4539 |
+| kd_uniform_seed42 | ORT CUDA | 4 | 90.8 | 91.1 | 44.0 | 18724 | 425 | 4805 |
+| kd_uniform_seed42 | ORT CUDA | 8 | 164.3 | 165.3 | 48.7 | 19595 | 402 | 4803 |
+| kd_uniform_seed42 | TensorRT FP16 | 1 | 11.9 | 17.1 | 78.9 | 12080 | 153 | 4399 |
+| nokd_seed42 | ORT CPU | 1 | 322.3 | 349.1 | 3.1 | 8298 | 2700 | 4311 |
+| nokd_seed42 | ORT CPU | 4 | 1123.2 | 1269.8 | 3.3 | 8316 | 2520 | 4359 |
+| nokd_seed42 | ORT CPU | 8 | 2195.9 | 2243.4 | 3.6 | 8552 | 2352 | 4463 |
+| nokd_seed42 | ORT CUDA | 1 | 34.7 | 35.3 | 28.7 | 15876 | 553 | 4552 |
+| nokd_seed42 | ORT CUDA | 4 | 90.6 | 90.9 | 44.1 | 18843 | 427 | 4561 |
+| nokd_seed42 | ORT CUDA | 8 | 164.6 | 165.6 | 48.6 | 19615 | 404 | 4857 |
+| nokd_seed42 | TensorRT FP16 | 1 | 11.8 | 17.1 | 80.5 | 12374 | 154 | 4461 |
+
+See the top-level README for the protocol and caveats.

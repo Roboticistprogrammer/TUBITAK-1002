@@ -1,0 +1,111 @@
+{
+  "baseline": {
+    "name": "nokd_seed42_ort_cuda",
+    "family": "swinv2"
+  },
+  "protocol": {
+    "input": [
+      3,
+      192,
+      192
+    ],
+    "warmup_runs": 20,
+    "timed_runs": 100,
+    "timing_scope": "runtime infer call incl. H2D/D2H transfer; preprocessing excluded",
+    "git_commit": "02786f616415764b5a6212efdb9ab57ee4db28cd"
+  },
+  "environment": {
+    "platform": "Linux-5.15.148-tegra-aarch64-with-glibc2.35",
+    "python": "3.10.12",
+    "torch": "2.9.0+cu126",
+    "cuda_runtime": "12.6",
+    "device": "Orin",
+    "idle_ram_used_mb": 3321.89453125
+  },
+  "runtimes": {
+    "onnx": {
+      "artifact": "artifacts/retrain/nokd_seed42.onnx",
+      "artifact_sha256": "2bc0786073be724b2995609a7cdf5eafbef1dfdbd0d1d6ca032131f3eb7030b3",
+      "artifact_mib": 333.5244789123535,
+      "batches": {
+        "1": {
+          "batch_size": 1,
+          "runs": 100,
+          "mean_batch_ms": 34.812694069996724,
+          "p50_batch_ms": 34.66600449996804,
+          "p95_batch_ms": 35.25090509990605,
+          "p99_batch_ms": 36.65535565984558,
+          "std_batch_ms": 0.8007706887635124,
+          "mean_ms_per_image": 34.812694069996724,
+          "throughput_images_per_second": 28.725154048386297,
+          "power": {
+            "rail": "VDD_IN",
+            "samples": 31,
+            "mean_mw": 15875.870967741936,
+            "max_mw": 16289.0
+          },
+          "energy_mj_per_image": 552.6818390947428,
+          "memory": {
+            "samples": 31,
+            "first_ram_mb": 4550.0,
+            "peak_ram_mb": 4552.0,
+            "mean_ram_mb": 4551.419354838709
+          }
+        },
+        "4": {
+          "batch_size": 4,
+          "runs": 100,
+          "mean_batch_ms": 90.67827362998287,
+          "p50_batch_ms": 90.63127849981356,
+          "p95_batch_ms": 90.94377359979262,
+          "p99_batch_ms": 91.22737368991238,
+          "std_batch_ms": 0.194684514833402,
+          "mean_ms_per_image": 22.669568407495717,
+          "throughput_images_per_second": 44.11199992979791,
+          "power": {
+            "rail": "VDD_IN",
+            "samples": 84,
+            "mean_mw": 18842.904761904763,
+            "max_mw": 18910.0
+          },
+          "energy_mj_per_image": 427.1605184959268,
+          "memory": {
+            "samples": 84,
+            "first_ram_mb": 4561.0,
+            "peak_ram_mb": 4561.0,
+            "mean_ram_mb": 4558.738095238095
+          }
+        },
+        "8": {
+          "batch_size": 8,
+          "runs": 100,
+          "mean_batch_ms": 164.7177781600385,
+          "p50_batch_ms": 164.6118230000866,
+          "p95_batch_ms": 165.61171255029876,
+          "p99_batch_ms": 165.79004962018644,
+          "std_batch_ms": 0.4588906864067223,
+          "mean_ms_per_image": 20.589722270004813,
+          "throughput_images_per_second": 48.56792077554168,
+          "power": {
+            "rail": "VDD_IN",
+            "samples": 154,
+            "mean_mw": 19614.512987012986,
+            "max_mw": 19726.0
+          },
+          "energy_mj_per_image": 403.8573748639999,
+          "memory": {
+            "samples": 154,
+            "first_ram_mb": 4846.0,
+            "peak_ram_mb": 4857.0,
+            "mean_ram_mb": 4853.454545454545
+          }
+        }
+      },
+      "onnxruntime_providers": [
+        "CUDAExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "onnxruntime_version": "1.23.0"
+    }
+  }
+}
