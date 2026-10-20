@@ -1,0 +1,32 @@
+| model | runtime | batch | p50 ms/batch | p95 ms/batch | img/s | power mW | mJ/img | peak RAM MB |
+|---|---|---|---|---|---|---|---|---|
+| kd_routed_seed42 | ort_cpu | 1 | 1022.3 | 1333.8 | 1.0 | 8202 | 8049 | 4514 |
+| kd_routed_seed42 | ort_cpu | 4 | 1798.7 | 2440.1 | 2.3 | 8749 | 3752 | 4520 |
+| kd_routed_seed42 | ort_cpu | 8 | 2201.4 | 2565.2 | 3.5 | 9094 | 2585 | 4462 |
+| kd_routed_seed42 | ort_cuda | 1 | 34.9 | 36.1 | 28.5 | 15776 | 554 | 4595 |
+| kd_routed_seed42 | ort_cuda | 4 | 91.1 | 91.6 | 43.9 | 18697 | 426 | 4618 |
+| kd_routed_seed42 | ort_cuda | 8 | 165.5 | 169.1 | 48.2 | 19826 | 412 | 4894 |
+| kd_routed_seed42 | trt_fp16 | 1 | 11.8 | 14.7 | 81.1 | 12727 | 157 | 4468 |
+| kd_uniform_seed42 | ort_cpu | 1 | 331.2 | 1014.1 | 1.9 | 7913 | 4089 | 4439 |
+| kd_uniform_seed42 | ort_cpu | 4 | 1129.3 | 1283.3 | 3.5 | 8447 | 2432 | 4376 |
+| kd_uniform_seed42 | ort_cpu | 8 | 2226.7 | 2328.2 | 3.6 | 8549 | 2397 | 4499 |
+| kd_uniform_seed42 | ort_cuda | 1 | 34.6 | 35.0 | 28.7 | 15851 | 553 | 4539 |
+| kd_uniform_seed42 | ort_cuda | 4 | 90.8 | 91.1 | 44.0 | 18724 | 425 | 4805 |
+| kd_uniform_seed42 | ort_cuda | 8 | 164.3 | 165.3 | 48.7 | 19595 | 402 | 4803 |
+| kd_uniform_seed42 | trt_fp16 | 1 | 11.9 | 17.1 | 78.9 | 12080 | 153 | 4399 |
+| mobilenet_v3_large_seed42 | ort_cpu | 1 | 22.3 | 32.0 | 42.2 | 8218 | 195 | 4570 |
+| mobilenet_v3_large_seed42 | ort_cpu | 4 | 76.5 | 87.6 | 50.3 | 8229 | 163 | 4591 |
+| mobilenet_v3_large_seed42 | ort_cpu | 8 | 150.3 | 195.6 | 50.7 | 8245 | 163 | 4586 |
+| mobilenet_v3_large_seed42 | ort_cuda | 1 | 5.5 | 8.9 | 164.5 | 7996 | 49 | 4859 |
+| mobilenet_v3_large_seed42 | ort_cuda | 4 | 8.5 | 11.0 | 460.5 | 13044 | 28 | 4903 |
+| mobilenet_v3_large_seed42 | ort_cuda | 8 | 15.3 | 15.6 | 520.8 | 15586 | 30 | 5024 |
+| mobilenet_v3_large_seed42 | trt_fp16 | 1 | 4.0 | 4.2 | 249.8 | 6439 | 26 | 4732 |
+| mobilenet_v3_large_seed42 | trt_fp16 | 4 | 6.2 | 7.9 | 607.3 | 7410 | 12 | 4732 |
+| mobilenet_v3_large_seed42 | trt_fp16 | 8 | 7.5 | 8.6 | 1085.8 | 9443 | 9 | 4741 |
+| nokd_seed42 | ort_cpu | 1 | 322.3 | 349.1 | 3.1 | 8298 | 2700 | 4311 |
+| nokd_seed42 | ort_cpu | 4 | 1123.2 | 1269.8 | 3.3 | 8316 | 2520 | 4359 |
+| nokd_seed42 | ort_cpu | 8 | 2195.9 | 2243.4 | 3.6 | 8552 | 2352 | 4463 |
+| nokd_seed42 | ort_cuda | 1 | 34.7 | 35.3 | 28.7 | 15876 | 553 | 4552 |
+| nokd_seed42 | ort_cuda | 4 | 90.6 | 90.9 | 44.1 | 18843 | 427 | 4561 |
+| nokd_seed42 | ort_cuda | 8 | 164.6 | 165.6 | 48.6 | 19615 | 404 | 4857 |
+| nokd_seed42 | trt_fp16 | 1 | 11.8 | 17.1 | 80.5 | 12374 | 154 | 4461 |

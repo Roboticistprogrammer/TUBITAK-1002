@@ -12,6 +12,12 @@
 | kd_uniform_seed42_trt_fp16 | cv | 15884 | 0.9169 | 0.9047 | 0.9166 |
 | kd_uniform_seed42_trt_fp16 | uav | 4181 | 0.9519 | 0.9138 | 0.9511 |
 | kd_uniform_seed42_trt_fp16 | rs | 370 | 0.8703 | 0.5986 | 0.8721 |
+| mobilenet_v3_large_seed42_onnx | cv | 15884 | 0.9117 | 0.8980 | 0.9133 |
+| mobilenet_v3_large_seed42_onnx | uav | 4181 | 0.9522 | 0.9243 | 0.9515 |
+| mobilenet_v3_large_seed42_onnx | rs | 370 | 0.8649 | 0.5882 | 0.8655 |
+| mobilenet_v3_large_seed42_trt_fp16 | cv | 15884 | 0.9119 | 0.8982 | 0.9134 |
+| mobilenet_v3_large_seed42_trt_fp16 | uav | 4181 | 0.9524 | 0.9245 | 0.9517 |
+| mobilenet_v3_large_seed42_trt_fp16 | rs | 370 | 0.8676 | 0.5913 | 0.8678 |
 | nokd_seed42_onnx | cv | 15884 | 0.9105 | 0.8997 | 0.9117 |
 | nokd_seed42_onnx | uav | 4181 | 0.9388 | 0.9015 | 0.9364 |
 | nokd_seed42_onnx | rs | 370 | 0.8838 | 0.6163 | 0.8839 |
