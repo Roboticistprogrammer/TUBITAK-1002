@@ -55,10 +55,10 @@ Column b = images only MobileNetV3-Large classifies correctly; c = images only t
 
 | Model | p50 latency (ms) | Energy per image (mJ) | Engine size (MiB) |
 |---|---|---|---|
-| MobileNetV3-Large | 4.0 | 25.8 | 9.3 |
-| SwinV2-B, KD routed | 11.8 | 156.8 | 173.7 |
-| SwinV2-B, KD uniform | 11.9 | 153.2 | 173.7 |
-| SwinV2-B, no KD | 11.8 | 153.7 | 173.7 |
+| MobileNetV3-Large | 4.6 | 27.2 | 9.3 |
+| SwinV2-B, KD routed | 11.8 | 164.8 | 173.7 |
+| SwinV2-B, KD uniform | 11.9 | 159.0 | 173.7 |
+| SwinV2-B, no KD | 11.7 | 156.2 | 173.7 |
 
 ## Label check: presence-rule label vs FASDD filename prefix
 

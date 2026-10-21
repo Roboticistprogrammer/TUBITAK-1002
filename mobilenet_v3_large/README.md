@@ -11,15 +11,15 @@
 
 | model | runtime | batch | p50 ms/batch | p95 ms/batch | img/s | mean power mW | mJ/img | peak RAM MB |
 |---|---|---|---|---|---|---|---|---|
-| mobilenet_v3_large_seed42 | ORT CPU | 1 | 22.3 | 32.0 | 42.2 | 8218 | 195 | 4570 |
-| mobilenet_v3_large_seed42 | ORT CPU | 4 | 76.5 | 87.6 | 50.3 | 8229 | 163 | 4591 |
-| mobilenet_v3_large_seed42 | ORT CPU | 8 | 150.3 | 195.6 | 50.7 | 8245 | 163 | 4586 |
-| mobilenet_v3_large_seed42 | ORT CUDA | 1 | 5.5 | 8.9 | 164.5 | 7996 | 49 | 4859 |
-| mobilenet_v3_large_seed42 | ORT CUDA | 4 | 8.5 | 11.0 | 460.5 | 13044 | 28 | 4903 |
-| mobilenet_v3_large_seed42 | ORT CUDA | 8 | 15.3 | 15.6 | 520.8 | 15586 | 30 | 5024 |
-| mobilenet_v3_large_seed42 | TensorRT FP16 | 1 | 4.0 | 4.2 | 249.8 | 6439 | 26 | 4732 |
-| mobilenet_v3_large_seed42 | TensorRT FP16 | 4 | 6.2 | 7.9 | 607.3 | 7410 | 12 | 4732 |
-| mobilenet_v3_large_seed42 | TensorRT FP16 | 8 | 7.5 | 8.6 | 1085.8 | 9443 | 9 | 4741 |
+| mobilenet_v3_large_seed42 | ORT CPU | 1 | 22.5 | 30.4 | 42.0 | 7625 | 182 | 4474 |
+| mobilenet_v3_large_seed42 | ORT CPU | 4 | 75.9 | 87.0 | 52.0 | 7635 | 147 | 4501 |
+| mobilenet_v3_large_seed42 | ORT CPU | 8 | 149.6 | 159.3 | 53.0 | 7674 | 145 | 4533 |
+| mobilenet_v3_large_seed42 | ORT CUDA | 1 | 5.7 | 8.8 | 165.5 | 7214 | 44 | 4526 |
+| mobilenet_v3_large_seed42 | ORT CUDA | 4 | 8.5 | 11.9 | 434.6 | 11537 | 27 | 4537 |
+| mobilenet_v3_large_seed42 | ORT CUDA | 8 | 15.3 | 15.5 | 521.6 | 15262 | 29 | 4609 |
+| mobilenet_v3_large_seed42 | TensorRT FP16 | 1 | 4.6 | 4.8 | 219.5 | 5963 | 27 | 4291 |
+| mobilenet_v3_large_seed42 | TensorRT FP16 | 4 | 5.3 | 6.4 | 718.2 | 7163 | 10 | 4292 |
+| mobilenet_v3_large_seed42 | TensorRT FP16 | 8 | 7.0 | 7.8 | 1143.9 | 8987 | 8 | 4294 |
 
 ## Figures and full metrics
 

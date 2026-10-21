@@ -31,27 +31,27 @@ accuracy_summary.csv   latency_throughput.csv   (all architectures)
 
 | model | runtime | batch | p50 ms/batch | p95 ms/batch | img/s | mean power mW | mJ/img | peak RAM MB |
 |---|---|---|---|---|---|---|---|---|
-| kd_routed_seed42 | ORT CPU | 1 | 1022.3 | 1333.8 | 1.0 | 8202 | 8049 | 4514 |
-| kd_routed_seed42 | ORT CPU | 4 | 1798.7 | 2440.1 | 2.3 | 8749 | 3752 | 4520 |
-| kd_routed_seed42 | ORT CPU | 8 | 2201.4 | 2565.2 | 3.5 | 9094 | 2585 | 4462 |
-| kd_routed_seed42 | ORT CUDA | 1 | 34.9 | 36.1 | 28.5 | 15776 | 554 | 4595 |
-| kd_routed_seed42 | ORT CUDA | 4 | 91.1 | 91.6 | 43.9 | 18697 | 426 | 4618 |
-| kd_routed_seed42 | ORT CUDA | 8 | 165.5 | 169.1 | 48.2 | 19826 | 412 | 4894 |
-| kd_routed_seed42 | TensorRT FP16 | 1 | 11.8 | 14.7 | 81.1 | 12727 | 157 | 4468 |
-| kd_uniform_seed42 | ORT CPU | 1 | 331.2 | 1014.1 | 1.9 | 7913 | 4089 | 4439 |
-| kd_uniform_seed42 | ORT CPU | 4 | 1129.3 | 1283.3 | 3.5 | 8447 | 2432 | 4376 |
-| kd_uniform_seed42 | ORT CPU | 8 | 2226.7 | 2328.2 | 3.6 | 8549 | 2397 | 4499 |
-| kd_uniform_seed42 | ORT CUDA | 1 | 34.6 | 35.0 | 28.7 | 15851 | 553 | 4539 |
-| kd_uniform_seed42 | ORT CUDA | 4 | 90.8 | 91.1 | 44.0 | 18724 | 425 | 4805 |
-| kd_uniform_seed42 | ORT CUDA | 8 | 164.3 | 165.3 | 48.7 | 19595 | 402 | 4803 |
-| kd_uniform_seed42 | TensorRT FP16 | 1 | 11.9 | 17.1 | 78.9 | 12080 | 153 | 4399 |
-| nokd_seed42 | ORT CPU | 1 | 322.3 | 349.1 | 3.1 | 8298 | 2700 | 4311 |
-| nokd_seed42 | ORT CPU | 4 | 1123.2 | 1269.8 | 3.3 | 8316 | 2520 | 4359 |
-| nokd_seed42 | ORT CPU | 8 | 2195.9 | 2243.4 | 3.6 | 8552 | 2352 | 4463 |
-| nokd_seed42 | ORT CUDA | 1 | 34.7 | 35.3 | 28.7 | 15876 | 553 | 4552 |
-| nokd_seed42 | ORT CUDA | 4 | 90.6 | 90.9 | 44.1 | 18843 | 427 | 4561 |
-| nokd_seed42 | ORT CUDA | 8 | 164.6 | 165.6 | 48.6 | 19615 | 404 | 4857 |
-| nokd_seed42 | TensorRT FP16 | 1 | 11.8 | 17.1 | 80.5 | 12374 | 154 | 4461 |
+| kd_routed_seed42 | ORT CPU | 1 | 380.0 | 527.3 | 2.4 | 8727 | 3598 | 4610 |
+| kd_routed_seed42 | ORT CPU | 4 | 1314.4 | 1382.9 | 3.1 | 8965 | 2935 | 4636 |
+| kd_routed_seed42 | ORT CPU | 8 | 2506.5 | 3253.4 | 3.1 | 9032 | 2924 | 4727 |
+| kd_routed_seed42 | ORT CUDA | 1 | 35.0 | 35.5 | 28.5 | 16405 | 576 | 4652 |
+| kd_routed_seed42 | ORT CUDA | 4 | 91.2 | 92.8 | 43.6 | 19260 | 441 | 4665 |
+| kd_routed_seed42 | ORT CUDA | 8 | 166.6 | 170.5 | 47.8 | 20082 | 420 | 5018 |
+| kd_routed_seed42 | TensorRT FP16 | 1 | 11.8 | 17.8 | 79.3 | 13068 | 165 | 4624 |
+| kd_uniform_seed42 | ORT CPU | 1 | 362.5 | 427.6 | 2.7 | 8773 | 3270 | 4696 |
+| kd_uniform_seed42 | ORT CPU | 4 | 1289.4 | 1352.7 | 3.1 | 8964 | 2880 | 4698 |
+| kd_uniform_seed42 | ORT CPU | 8 | 2437.9 | 2564.4 | 3.3 | 8804 | 2689 | 4760 |
+| kd_uniform_seed42 | ORT CUDA | 1 | 34.8 | 35.7 | 28.5 | 15946 | 559 | 4704 |
+| kd_uniform_seed42 | ORT CUDA | 4 | 91.2 | 91.7 | 43.8 | 18826 | 430 | 5064 |
+| kd_uniform_seed42 | ORT CUDA | 8 | 164.9 | 166.3 | 48.5 | 19644 | 405 | 5074 |
+| kd_uniform_seed42 | TensorRT FP16 | 1 | 11.9 | 15.6 | 80.7 | 12826 | 159 | 4673 |
+| nokd_seed42 | ORT CPU | 1 | 343.4 | 401.7 | 2.8 | 8234 | 2903 | 4642 |
+| nokd_seed42 | ORT CPU | 4 | 1229.5 | 1275.0 | 3.3 | 8416 | 2569 | 4640 |
+| nokd_seed42 | ORT CPU | 8 | 2377.8 | 2442.9 | 3.4 | 8526 | 2544 | 4690 |
+| nokd_seed42 | ORT CUDA | 1 | 34.9 | 35.6 | 28.5 | 15865 | 557 | 4696 |
+| nokd_seed42 | ORT CUDA | 4 | 90.9 | 91.3 | 44.0 | 18855 | 429 | 5021 |
+| nokd_seed42 | ORT CUDA | 8 | 164.7 | 166.7 | 48.5 | 19639 | 405 | 5027 |
+| nokd_seed42 | TensorRT FP16 | 1 | 11.7 | 17.4 | 80.2 | 12522 | 156 | 4614 |
 
 ## MobileNetV3-Large baseline (4.2M params)
 
@@ -66,15 +66,15 @@ accuracy_summary.csv   latency_throughput.csv   (all architectures)
 
 | model | runtime | batch | p50 ms/batch | p95 ms/batch | img/s | mean power mW | mJ/img | peak RAM MB |
 |---|---|---|---|---|---|---|---|---|
-| mobilenet_v3_large_seed42 | ORT CPU | 1 | 22.3 | 32.0 | 42.2 | 8218 | 195 | 4570 |
-| mobilenet_v3_large_seed42 | ORT CPU | 4 | 76.5 | 87.6 | 50.3 | 8229 | 163 | 4591 |
-| mobilenet_v3_large_seed42 | ORT CPU | 8 | 150.3 | 195.6 | 50.7 | 8245 | 163 | 4586 |
-| mobilenet_v3_large_seed42 | ORT CUDA | 1 | 5.5 | 8.9 | 164.5 | 7996 | 49 | 4859 |
-| mobilenet_v3_large_seed42 | ORT CUDA | 4 | 8.5 | 11.0 | 460.5 | 13044 | 28 | 4903 |
-| mobilenet_v3_large_seed42 | ORT CUDA | 8 | 15.3 | 15.6 | 520.8 | 15586 | 30 | 5024 |
-| mobilenet_v3_large_seed42 | TensorRT FP16 | 1 | 4.0 | 4.2 | 249.8 | 6439 | 26 | 4732 |
-| mobilenet_v3_large_seed42 | TensorRT FP16 | 4 | 6.2 | 7.9 | 607.3 | 7410 | 12 | 4732 |
-| mobilenet_v3_large_seed42 | TensorRT FP16 | 8 | 7.5 | 8.6 | 1085.8 | 9443 | 9 | 4741 |
+| mobilenet_v3_large_seed42 | ORT CPU | 1 | 22.5 | 30.4 | 42.0 | 7625 | 182 | 4474 |
+| mobilenet_v3_large_seed42 | ORT CPU | 4 | 75.9 | 87.0 | 52.0 | 7635 | 147 | 4501 |
+| mobilenet_v3_large_seed42 | ORT CPU | 8 | 149.6 | 159.3 | 53.0 | 7674 | 145 | 4533 |
+| mobilenet_v3_large_seed42 | ORT CUDA | 1 | 5.7 | 8.8 | 165.5 | 7214 | 44 | 4526 |
+| mobilenet_v3_large_seed42 | ORT CUDA | 4 | 8.5 | 11.9 | 434.6 | 11537 | 27 | 4537 |
+| mobilenet_v3_large_seed42 | ORT CUDA | 8 | 15.3 | 15.5 | 521.6 | 15262 | 29 | 4609 |
+| mobilenet_v3_large_seed42 | TensorRT FP16 | 1 | 4.6 | 4.8 | 219.5 | 5963 | 27 | 4291 |
+| mobilenet_v3_large_seed42 | TensorRT FP16 | 4 | 5.3 | 6.4 | 718.2 | 7163 | 10 | 4292 |
+| mobilenet_v3_large_seed42 | TensorRT FP16 | 8 | 7.0 | 7.8 | 1143.9 | 8987 | 8 | 4294 |
 
 ## ResNet-50 baseline (23.5M params)
 
@@ -89,17 +89,15 @@ accuracy_summary.csv   latency_throughput.csv   (all architectures)
 
 | model | runtime | batch | p50 ms/batch | p95 ms/batch | img/s | mean power mW | mJ/img | peak RAM MB |
 |---|---|---|---|---|---|---|---|---|
-| resnet50_seed42 | ORT CPU | 1 | 79.6 | 116.7 | 12.0 | 8124 | 678 | 5565 |
-| resnet50_seed42 | ORT CPU | 4 | 331.4 | 389.0 | 11.7 | 8002 | 684 | 5591 |
-| resnet50_seed42 | ORT CPU | 8 | 665.7 | 769.7 | 11.6 | 8038 | 691 | 5710 |
-| resnet50_seed42 | ORT CUDA | 1 | 10.6 | 11.9 | 92.2 | 12533 | 136 | 5993 |
-| resnet50_seed42 | ORT CUDA | 4 | 25.7 | 26.1 | 155.1 | 18028 | 116 | 6121 |
-| resnet50_seed42 | ORT CUDA | 8 | 43.2 | 43.5 | 185.0 | 18636 | 101 | 6142 |
-| resnet50_seed42 | TensorRT FP16 | 1 | 5.2 | 7.0 | 188.6 | 7048 | 37 | 5824 |
-| resnet50_seed42 | TensorRT FP16 | 4 | 7.3 | 9.4 | 535.3 | 11200 | 21 | 5826 |
-| resnet50_seed42 | TensorRT FP16 | 8 | 10.9 | 11.3 | 731.3 | 16340 | 22 | 5808 |
-
-Peak RAM here is higher than for the other models because Firefox and VS Code were open during the ResNet-50 run (system-wide RAM, not the model footprint; each JSON records `idle_ram_used_mb`, and footprint = peak minus idle). Latency and throughput are not affected the same way, but rerun with the desktop closed if exact comparability with the other rows matters.
+| resnet50_seed42 | ORT CPU | 1 | 85.5 | 120.8 | 11.3 | 8066 | 711 | 4308 |
+| resnet50_seed42 | ORT CPU | 4 | 335.4 | 382.8 | 11.6 | 7936 | 684 | 4343 |
+| resnet50_seed42 | ORT CPU | 8 | 662.0 | 715.4 | 11.9 | 8016 | 672 | 4388 |
+| resnet50_seed42 | ORT CUDA | 1 | 10.2 | 11.5 | 94.3 | 12503 | 133 | 4512 |
+| resnet50_seed42 | ORT CUDA | 4 | 25.7 | 25.8 | 155.8 | 17961 | 115 | 4527 |
+| resnet50_seed42 | ORT CUDA | 8 | 43.1 | 43.3 | 185.6 | 18599 | 100 | 4537 |
+| resnet50_seed42 | TensorRT FP16 | 1 | 6.5 | 6.7 | 156.6 | 6749 | 43 | 4257 |
+| resnet50_seed42 | TensorRT FP16 | 4 | 7.3 | 9.4 | 532.2 | 11158 | 21 | 4266 |
+| resnet50_seed42 | TensorRT FP16 | 8 | 10.9 | 11.0 | 737.5 | 16273 | 22 | 4272 |
 
 Figures (PDF + PNG) and full metrics are in `resnet50/figures/`. Desktop-GPU reference timings and the PyTorch row are in `resnet50/README.md`.
 
@@ -107,10 +105,10 @@ Figures (PDF + PNG) and full metrics are in `resnet50/figures/`. Desktop-GPU ref
 
 - **Accuracy:** `02_dump_predictions.py`, same eval transform as training (resize 224, centre-crop 192, ImageNet mean/std). The ONNX rows ran on **ONNX Runtime 1.23.2, CPU provider** (the stock aarch64 wheel has no CUDA); the engine rows ran on the Jetson GPU. FP16 engines differ from the ONNX predictions on a few images only (see per-modality columns). MobileNetV3 ONNX accuracy matches the numbers in its own model README. ResNet-50 ONNX CPU predictions here differ from the desktop-CPU run in `resnet50/README.md` by one UAV image (0.9464 vs 0.9467), which is normal between CPU/onnxruntime builds.
 - **RS** has no `fire`-only images and UAV only 35, so per-class and macro-F1 values there are noisy; the RS macro-F1 includes a zero-score class. Report per modality.
-- **Latency:** `benchmark_baseline.py`, 20 warm-up + 100 timed runs per batch size, includes host/device transfer, excludes image decoding/preprocessing. Power is the `VDD_IN` rail from tegrastats during the run; `peak RAM` is whole-system used RAM (it includes about 4.3-4.5 GB of idle usage, so it is not the model footprint).
+- **Latency:** `benchmark_baseline.py`, 20 warm-up + 100 timed runs per batch size, includes host/device transfer, excludes image decoding/preprocessing. Power is the `VDD_IN` rail from tegrastats during the run; `peak RAM` is whole-system used RAM (it includes about 4.2-4.4 GB of idle usage, so it is not the model footprint; each JSON records `idle_ram_used_mb`). All 15 benchmark runs were repeated in one session with Firefox closed so RAM and ORT CPU rows are comparable across models; the CPU governor was `schedutil` (clocks could not be locked without sudo) in power mode 25W, see `env.txt`.
 - **ORT CUDA** rows use the Jetson AI Lab `onnxruntime-gpu 1.23.0` build with the system JetPack cuBLAS/cuDNN preloaded (pip torch's bundled copies otherwise break it). **ORT CPU** rows use the same build with `--onnx-cpu`.
 - **SwinV2 engines were built with a batch-1 profile**, so they are benchmarked at batch 1 only. The MobileNetV3 engine was built with max batch 8 and is benchmarked at batch 1/4/8.
-- **ORT CPU, SwinV2, batch 1 is unstable** (p50 1022 / 331 / 322 ms for the three models, same architecture); treat it as indicative until rerun with locked clocks. CUDA and TensorRT rows are consistent across models.
+- **Run-to-run variation:** clocks were not locked, so small models at batch 1 vary by roughly 15-25% between sessions (ResNet-50 TensorRT p50 was 5.2 ms in an earlier session and 6.5 ms in the final one; MobileNetV3 4.0 vs 4.6 ms). SwinV2 and the batch-8 rows are stable within a few percent. Compare models within this table, not across sessions.
 - No GPU PyTorch rows: the pip torch build on this board has no sm_87 kernels.
 - Environment: Jetson Orin (JetPack 6, L4T R36.4.7), TensorRT 10.3.0, CUDA 12.6.
 

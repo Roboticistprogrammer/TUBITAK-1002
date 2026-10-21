@@ -12,7 +12,7 @@
     "warmup_runs": 20,
     "timed_runs": 100,
     "timing_scope": "runtime infer call incl. H2D/D2H transfer; preprocessing excluded",
-    "git_commit": "02786f616415764b5a6212efdb9ab57ee4db28cd"
+    "git_commit": "b6b9188cc448145510dab3c8ade24435e01fadcf"
   },
   "environment": {
     "platform": "Linux-5.15.148-tegra-aarch64-with-glibc2.35",
@@ -20,84 +20,84 @@
     "torch": "2.9.0+cu126",
     "cuda_runtime": "12.6",
     "device": "Orin",
-    "idle_ram_used_mb": 4128.58203125
+    "idle_ram_used_mb": 4199.73046875
   },
   "runtimes": {
     "onnx": {
-      "artifact": "artifacts/retrain/kd_uniform_seed42.onnx",
+      "artifact": "/home/dronex/Projects/TUBITAK-1002/artifacts/retrain/kd_uniform_seed42.onnx",
       "artifact_sha256": "c8d41bb66d93eda228018c06caac1e592c2b49c4686c40168ecc864f06981167",
       "artifact_mib": 333.5244789123535,
       "batches": {
         "1": {
           "batch_size": 1,
           "runs": 100,
-          "mean_batch_ms": 516.7765634600119,
-          "p50_batch_ms": 331.1567755000624,
-          "p95_batch_ms": 1014.0547755999478,
-          "p99_batch_ms": 1121.9419937201885,
-          "std_batch_ms": 274.44847371259846,
-          "mean_ms_per_image": 516.7765634600119,
-          "throughput_images_per_second": 1.9350722743783637,
+          "mean_batch_ms": 372.6919983799962,
+          "p50_batch_ms": 362.4783610002851,
+          "p95_batch_ms": 427.5720695007294,
+          "p99_batch_ms": 454.8741164491003,
+          "std_batch_ms": 25.447102650340454,
+          "mean_ms_per_image": 372.6919983799962,
+          "throughput_images_per_second": 2.6831807614511796,
           "power": {
             "rail": "VDD_IN",
-            "samples": 359,
-            "mean_mw": 7912.640668523677,
-            "max_mw": 8329.0
+            "samples": 350,
+            "mean_mw": 8773.322857142857,
+            "max_mw": 8812.0
           },
-          "energy_mj_per_image": 4089.0672525735968,
+          "energy_mj_per_image": 3269.7472280614697,
           "memory": {
-            "samples": 359,
-            "first_ram_mb": 4393.0,
-            "peak_ram_mb": 4439.0,
-            "mean_ram_mb": 4352.930362116992
+            "samples": 350,
+            "first_ram_mb": 4695.0,
+            "peak_ram_mb": 4696.0,
+            "mean_ram_mb": 4670.0142857142855
           }
         },
         "4": {
           "batch_size": 4,
           "runs": 100,
-          "mean_batch_ms": 1151.7881506899946,
-          "p50_batch_ms": 1129.2959450000808,
-          "p95_batch_ms": 1283.289548149935,
-          "p99_batch_ms": 1652.1077259601007,
-          "std_batch_ms": 98.3803789053834,
-          "mean_ms_per_image": 287.94703767249865,
-          "throughput_images_per_second": 3.472860870815301,
+          "mean_batch_ms": 1285.3144327699556,
+          "p50_batch_ms": 1289.4117069999993,
+          "p95_batch_ms": 1352.7473245503643,
+          "p99_batch_ms": 1418.6574378807206,
+          "std_batch_ms": 51.549623212924914,
+          "mean_ms_per_image": 321.3286081924889,
+          "throughput_images_per_second": 3.1120789575043357,
           "power": {
             "rail": "VDD_IN",
-            "samples": 783,
-            "mean_mw": 8447.30779054917,
-            "max_mw": 8577.0
+            "samples": 1207,
+            "mean_mw": 8964.024855012427,
+            "max_mw": 9086.0
           },
-          "energy_mj_per_image": 2432.377254596453,
+          "energy_mj_per_image": 2880.39763046402,
           "memory": {
-            "samples": 783,
-            "first_ram_mb": 4371.0,
-            "peak_ram_mb": 4376.0,
-            "mean_ram_mb": 4367.155810983397
+            "samples": 1207,
+            "first_ram_mb": 4687.0,
+            "peak_ram_mb": 4698.0,
+            "mean_ram_mb": 4681.511184755593
           }
         },
         "8": {
           "batch_size": 8,
           "runs": 100,
-          "mean_batch_ms": 2242.7868017100036,
-          "p50_batch_ms": 2226.664755999991,
-          "p95_batch_ms": 2328.1680856499634,
-          "p99_batch_ms": 2586.461669900039,
-          "std_batch_ms": 111.31574471751631,
-          "mean_ms_per_image": 280.34835021375045,
-          "throughput_images_per_second": 3.5669908499106704,
+          "mean_batch_ms": 2443.570178880036,
+          "p50_batch_ms": 2437.854124500518,
+          "p95_batch_ms": 2564.439093951296,
+          "p99_batch_ms": 2844.568881180042,
+          "std_batch_ms": 122.81975462521632,
+          "mean_ms_per_image": 305.4462723600045,
+          "throughput_images_per_second": 3.273898195822085,
           "power": {
             "rail": "VDD_IN",
-            "samples": 1527,
-            "mean_mw": 8549.270464963982,
-            "max_mw": 8695.0
+            "samples": 2295,
+            "mean_mw": 8804.197385620915,
+            "max_mw": 9204.0
           },
-          "energy_mj_per_image": 2396.7738703837954,
+          "energy_mj_per_image": 2689.2092725596053,
           "memory": {
-            "samples": 1527,
-            "first_ram_mb": 4483.0,
-            "peak_ram_mb": 4499.0,
-            "mean_ram_mb": 4460.583497053045
+            "samples": 2295,
+            "first_ram_mb": 4740.0,
+            "peak_ram_mb": 4760.0,
+            "mean_ram_mb": 4723.603921568628
           }
         }
       },

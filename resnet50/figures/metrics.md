@@ -55,10 +55,10 @@ Column b = images only ResNet-50 classifies correctly; c = images only the stude
 
 | Model | p50 latency (ms) | Energy per image (mJ) | Engine size (MiB) |
 |---|---|---|---|
-| ResNet-50 | 5.2 | 37.4 | 45.5 |
-| SwinV2-B, KD routed | 11.8 | 156.8 | 173.7 |
-| SwinV2-B, KD uniform | 11.9 | 153.2 | 173.7 |
-| SwinV2-B, no KD | 11.8 | 153.7 | 173.7 |
+| ResNet-50 | 6.5 | 43.1 | 45.5 |
+| SwinV2-B, KD routed | 11.8 | 164.8 | 173.7 |
+| SwinV2-B, KD uniform | 11.9 | 159.0 | 173.7 |
+| SwinV2-B, no KD | 11.7 | 156.2 | 173.7 |
 
 ## Label check: presence-rule label vs FASDD filename prefix
 

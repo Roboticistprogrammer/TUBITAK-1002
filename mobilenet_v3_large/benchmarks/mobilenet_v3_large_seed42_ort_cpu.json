@@ -12,7 +12,7 @@
     "warmup_runs": 20,
     "timed_runs": 100,
     "timing_scope": "runtime infer call incl. H2D/D2H transfer; preprocessing excluded",
-    "git_commit": "9d4ac0a499d20887912608486d67fa7fada603e7"
+    "git_commit": "b6b9188cc448145510dab3c8ade24435e01fadcf"
   },
   "environment": {
     "platform": "Linux-5.15.148-tegra-aarch64-with-glibc2.35",
@@ -20,7 +20,7 @@
     "torch": "2.9.0+cu126",
     "cuda_runtime": "12.6",
     "device": "Orin",
-    "idle_ram_used_mb": 4258.84375
+    "idle_ram_used_mb": 4205.6015625
   },
   "runtimes": {
     "onnx": {
@@ -31,73 +31,73 @@
         "1": {
           "batch_size": 1,
           "runs": 100,
-          "mean_batch_ms": 23.672182480004267,
-          "p50_batch_ms": 22.265059999995174,
-          "p95_batch_ms": 32.015736949983875,
-          "p99_batch_ms": 37.9740334400367,
-          "std_batch_ms": 3.6483645746137765,
-          "mean_ms_per_image": 23.672182480004267,
-          "throughput_images_per_second": 42.24367570859566,
+          "mean_batch_ms": 23.810366110046743,
+          "p50_batch_ms": 22.5377570004639,
+          "p95_batch_ms": 30.364730501059956,
+          "p99_batch_ms": 50.34711781092485,
+          "std_batch_ms": 4.898175051618971,
+          "mean_ms_per_image": 23.810366110046743,
+          "throughput_images_per_second": 41.998514234438915,
           "power": {
             "rail": "VDD_IN",
             "samples": 22,
-            "mean_mw": 8217.59090909091,
-            "max_mw": 8342.0
+            "mean_mw": 7624.818181818182,
+            "max_mw": 7742.0
           },
-          "energy_mj_per_image": 194.52831154602416,
+          "energy_mj_per_image": 181.54971243163186,
           "memory": {
             "samples": 22,
-            "first_ram_mb": 4563.0,
-            "peak_ram_mb": 4570.0,
-            "mean_ram_mb": 4566.409090909091
+            "first_ram_mb": 4470.0,
+            "peak_ram_mb": 4474.0,
+            "mean_ram_mb": 4471.818181818182
           }
         },
         "4": {
           "batch_size": 4,
           "runs": 100,
-          "mean_batch_ms": 79.47428829000955,
-          "p50_batch_ms": 76.52811300010853,
-          "p95_batch_ms": 87.63320669994526,
-          "p99_batch_ms": 152.21073052981185,
-          "std_batch_ms": 11.772619605499171,
-          "mean_ms_per_image": 19.86857207250239,
-          "throughput_images_per_second": 50.33074326382897,
+          "mean_batch_ms": 76.98693184998774,
+          "p50_batch_ms": 75.86919900040812,
+          "p95_batch_ms": 87.044373900153,
+          "p99_batch_ms": 90.58670566877483,
+          "std_batch_ms": 3.563084771712607,
+          "mean_ms_per_image": 19.246732962496935,
+          "throughput_images_per_second": 51.956869872333236,
           "power": {
             "rail": "VDD_IN",
-            "samples": 74,
-            "mean_mw": 8228.851351351352,
-            "max_mw": 8290.0
+            "samples": 72,
+            "mean_mw": 7635.291666666667,
+            "max_mw": 7664.0
           },
-          "energy_mj_per_image": 163.495526148233,
+          "energy_mj_per_image": 146.9544197991115,
           "memory": {
-            "samples": 74,
-            "first_ram_mb": 4588.0,
-            "peak_ram_mb": 4591.0,
-            "mean_ram_mb": 4585.364864864865
+            "samples": 72,
+            "first_ram_mb": 4493.0,
+            "peak_ram_mb": 4501.0,
+            "mean_ram_mb": 4488.597222222223
           }
         },
         "8": {
           "batch_size": 8,
           "runs": 100,
-          "mean_batch_ms": 157.89433690000806,
-          "p50_batch_ms": 150.33764600002542,
-          "p95_batch_ms": 195.64164905000325,
-          "p99_batch_ms": 252.94952693003788,
-          "std_batch_ms": 19.733283948066298,
-          "mean_ms_per_image": 19.736792112501007,
-          "throughput_images_per_second": 50.66679500396693,
+          "mean_batch_ms": 150.89809925997542,
+          "p50_batch_ms": 149.59831600117468,
+          "p95_batch_ms": 159.3173849496452,
+          "p99_batch_ms": 172.3968315206003,
+          "std_batch_ms": 5.199636563249444,
+          "mean_ms_per_image": 18.862262407496928,
+          "throughput_images_per_second": 53.01590967171274,
           "power": {
             "rail": "VDD_IN",
-            "samples": 148,
-            "mean_mw": 8245.135135135135,
-            "max_mw": 8641.0
+            "samples": 141,
+            "mean_mw": 7673.95744680851,
+            "max_mw": 7703.0
           },
-          "energy_mj_per_image": 162.73251810164004,
+          "energy_mj_per_image": 144.74819906566725,
           "memory": {
-            "samples": 148,
-            "first_ram_mb": 4583.0,
-            "peak_ram_mb": 4586.0,
-            "mean_ram_mb": 4561.891891891892
+            "samples": 141,
+            "first_ram_mb": 4506.0,
+            "peak_ram_mb": 4533.0,
+            "mean_ram_mb": 4513.007092198582
           }
         }
       },

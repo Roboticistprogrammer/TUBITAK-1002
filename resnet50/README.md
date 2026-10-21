@@ -16,15 +16,15 @@ The ONNX Runtime and TensorRT FP16 rows were produced on the Jetson Orin (ONNX R
 
 | model | runtime | batch | p50 ms/batch | p95 ms/batch | img/s | mean power mW | mJ/img | peak RAM MB |
 |---|---|---|---|---|---|---|---|---|
-| resnet50_seed42 | ORT CPU | 1 | 79.6 | 116.7 | 12.0 | 8124 | 678 | 5565 |
-| resnet50_seed42 | ORT CPU | 4 | 331.4 | 389.0 | 11.7 | 8002 | 684 | 5591 |
-| resnet50_seed42 | ORT CPU | 8 | 665.7 | 769.7 | 11.6 | 8038 | 691 | 5710 |
-| resnet50_seed42 | ORT CUDA | 1 | 10.6 | 11.9 | 92.2 | 12533 | 136 | 5993 |
-| resnet50_seed42 | ORT CUDA | 4 | 25.7 | 26.1 | 155.1 | 18028 | 116 | 6121 |
-| resnet50_seed42 | ORT CUDA | 8 | 43.2 | 43.5 | 185.0 | 18636 | 101 | 6142 |
-| resnet50_seed42 | TensorRT FP16 | 1 | 5.2 | 7.0 | 188.6 | 7048 | 37 | 5824 |
-| resnet50_seed42 | TensorRT FP16 | 4 | 7.3 | 9.4 | 535.3 | 11200 | 21 | 5826 |
-| resnet50_seed42 | TensorRT FP16 | 8 | 10.9 | 11.3 | 731.3 | 16340 | 22 | 5808 |
+| resnet50_seed42 | ORT CPU | 1 | 85.5 | 120.8 | 11.3 | 8066 | 711 | 4308 |
+| resnet50_seed42 | ORT CPU | 4 | 335.4 | 382.8 | 11.6 | 7936 | 684 | 4343 |
+| resnet50_seed42 | ORT CPU | 8 | 662.0 | 715.4 | 11.9 | 8016 | 672 | 4388 |
+| resnet50_seed42 | ORT CUDA | 1 | 10.2 | 11.5 | 94.3 | 12503 | 133 | 4512 |
+| resnet50_seed42 | ORT CUDA | 4 | 25.7 | 25.8 | 155.8 | 17961 | 115 | 4527 |
+| resnet50_seed42 | ORT CUDA | 8 | 43.1 | 43.3 | 185.6 | 18599 | 100 | 4537 |
+| resnet50_seed42 | TensorRT FP16 | 1 | 6.5 | 6.7 | 156.6 | 6749 | 43 | 4257 |
+| resnet50_seed42 | TensorRT FP16 | 4 | 7.3 | 9.4 | 532.2 | 11158 | 21 | 4266 |
+| resnet50_seed42 | TensorRT FP16 | 8 | 10.9 | 11.0 | 737.5 | 16273 | 22 | 4272 |
 
 ## Reference speed on a desktop GPU (not Jetson)
 

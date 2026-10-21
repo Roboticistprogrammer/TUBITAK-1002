@@ -234,12 +234,12 @@
       "cv": {
         "only_first_correct": 550,
         "only_second_correct": 649,
-        "p_value": 0.0046318940489538905
+        "p_value": 0.004631894048953845
       },
       "uav": {
         "only_first_correct": 107,
         "only_second_correct": 62,
-        "p_value": 0.0006677136382200452
+        "p_value": 0.0006677136382200459
       },
       "rs": {
         "only_first_correct": 14,
@@ -251,12 +251,12 @@
       "cv": {
         "only_first_correct": 876,
         "only_second_correct": 956,
-        "p_value": 0.06490441275827805
+        "p_value": 0.06490441275827807
       },
       "uav": {
         "only_first_correct": 73,
         "only_second_correct": 71,
-        "p_value": 0.933624953548803
+        "p_value": 0.9336249535488024
       },
       "rs": {
         "only_first_correct": 25,
@@ -268,12 +268,12 @@
       "cv": {
         "only_first_correct": 731,
         "only_second_correct": 707,
-        "p_value": 0.5441812502087301
+        "p_value": 0.5441812502087285
       },
       "uav": {
         "only_first_correct": 121,
         "only_second_correct": 65,
-        "p_value": 4.880345473894997e-05
+        "p_value": 4.880345473894996e-05
       },
       "rs": {
         "only_first_correct": 18,
@@ -284,23 +284,23 @@
   },
   "deployment_batch1_trt_fp16": {
     "MobileNetV3-Large": {
-      "latency": 3.989640500094538,
-      "energy": 25.77576778703731,
+      "latency": 4.577244500069355,
+      "energy": 27.170278199348438,
       "size": 9.273479461669922
     },
     "SwinV2-B, KD routed": {
-      "latency": 11.844311499999094,
-      "energy": 156.84660136566418,
+      "latency": 11.848153999380884,
+      "energy": 164.75314749461597,
       "size": 173.66320419311523
     },
     "SwinV2-B, KD uniform": {
-      "latency": 11.890779500049575,
-      "energy": 153.19961553961164,
+      "latency": 11.939840999730222,
+      "energy": 158.9606078007855,
       "size": 173.66850662231445
     },
     "SwinV2-B, no KD": {
-      "latency": 11.78096850003385,
-      "energy": 153.66329526657822,
+      "latency": 11.748604999411327,
+      "energy": 156.1842629764983,
       "size": 173.6677131652832
     }
   },
