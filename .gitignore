@@ -37,6 +37,7 @@ ENV/
 env/
 Thesis/
 *.npz
+!*/predictions/**/*.npz
 
 # IDEs
 .vscode/

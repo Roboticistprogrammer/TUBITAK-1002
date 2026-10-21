@@ -100,11 +100,11 @@ comparison/            cross-architecture figures and summary table (see compari
 | resnet50_seed42 | TensorRT FP16 | 4 | 7.3 | 9.4 | 532.2 | 11158 | 21 | 4266 |
 | resnet50_seed42 | TensorRT FP16 | 8 | 10.9 | 11.0 | 737.5 | 16273 | 22 | 4272 |
 
-Figures (PDF + PNG) and full metrics are in `resnet50/figures/`. Desktop-GPU reference timings and the PyTorch row are in `resnet50/README.md`.
+Figures (PDF + PNG) and full metrics are in `resnet50/figures/`. 
 
 ## Protocol and caveats
 
-- **Accuracy:** `02_dump_predictions.py`, same eval transform as training (resize 224, centre-crop 192, ImageNet mean/std). The ONNX rows ran on **ONNX Runtime 1.23.2, CPU provider** (the stock aarch64 wheel has no CUDA); the engine rows ran on the Jetson GPU. FP16 engines differ from the ONNX predictions on a few images only (see per-modality columns). MobileNetV3 ONNX accuracy matches the numbers in its own model README. ResNet-50 ONNX CPU predictions here differ from the desktop-CPU run in `resnet50/README.md` by one UAV image (0.9464 vs 0.9467), which is normal between CPU/onnxruntime builds.
+- **Accuracy:** `02_dump_predictions.py`, same eval transform as training (resize 224, centre-crop 192, ImageNet mean/std). The ONNX rows ran on **ONNX Runtime 1.23.2, CPU provider** (the stock aarch64 wheel has no CUDA); the engine rows ran on the Jetson GPU. FP16 engines differ from the ONNX predictions on a few images only (see per-modality columns). MobileNetV3 ONNX accuracy matches the numbers in its own model README.
 - **RS** has no `fire`-only images and UAV only 35, so per-class and macro-F1 values there are noisy; the RS macro-F1 includes a zero-score class. Report per modality.
 - **Latency:** `benchmark_baseline.py`, 20 warm-up + 100 timed runs per batch size, includes host/device transfer, excludes image decoding/preprocessing. Power is the `VDD_IN` rail from tegrastats during the run; `peak RAM` is whole-system used RAM (it includes about 4.2-4.4 GB of idle usage, so it is not the model footprint; each JSON records `idle_ram_used_mb`). All 15 benchmark runs were repeated in one session with Firefox closed so RAM and ORT CPU rows are comparable across models; the CPU governor was `schedutil` (clocks could not be locked without sudo) in power mode 25W, see `env.txt`.
 - **ORT CUDA** rows use the Jetson AI Lab `onnxruntime-gpu 1.23.0` build with the system JetPack cuBLAS/cuDNN preloaded (pip torch's bundled copies otherwise break it). **ORT CPU** rows use the same build with `--onnx-cpu`.
