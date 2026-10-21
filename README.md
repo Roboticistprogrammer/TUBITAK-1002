@@ -82,13 +82,30 @@ accuracy_summary.csv   latency_throughput.csv   (all architectures)
 
 | model | runtime | CV acc | UAV acc | RS acc | CV macro-F1 | UAV macro-F1 | RS macro-F1 |
 |---|---|---|---|---|---|---|---|
-| resnet50_seed42 | ONNX Runtime (CPU) | 0.9032 | 0.9467 | 0.8541 | 0.8908 | 0.9015 | 0.5649 |
+| resnet50_seed42 | ONNX Runtime (CPU) | 0.9032 | 0.9464 | 0.8541 | 0.8908 | 0.9013 | 0.5649 |
+| resnet50_seed42 | TensorRT FP16 | 0.9030 | 0.9467 | 0.8541 | 0.8905 | 0.9015 | 0.5649 |
 
-TensorRT FP16 accuracy and Jetson Orin latency / throughput / power are not yet measured for ResNet-50. Desktop reference timings and the PyTorch row are in `resnet50/README.md`.
+### Latency / throughput (Jetson Orin, random 192x192 input, preprocessing excluded)
+
+| model | runtime | batch | p50 ms/batch | p95 ms/batch | img/s | mean power mW | mJ/img | peak RAM MB |
+|---|---|---|---|---|---|---|---|---|
+| resnet50_seed42 | ORT CPU | 1 | 79.6 | 116.7 | 12.0 | 8124 | 678 | 5565 |
+| resnet50_seed42 | ORT CPU | 4 | 331.4 | 389.0 | 11.7 | 8002 | 684 | 5591 |
+| resnet50_seed42 | ORT CPU | 8 | 665.7 | 769.7 | 11.6 | 8038 | 691 | 5710 |
+| resnet50_seed42 | ORT CUDA | 1 | 10.6 | 11.9 | 92.2 | 12533 | 136 | 5993 |
+| resnet50_seed42 | ORT CUDA | 4 | 25.7 | 26.1 | 155.1 | 18028 | 116 | 6121 |
+| resnet50_seed42 | ORT CUDA | 8 | 43.2 | 43.5 | 185.0 | 18636 | 101 | 6142 |
+| resnet50_seed42 | TensorRT FP16 | 1 | 5.2 | 7.0 | 188.6 | 7048 | 37 | 5824 |
+| resnet50_seed42 | TensorRT FP16 | 4 | 7.3 | 9.4 | 535.3 | 11200 | 21 | 5826 |
+| resnet50_seed42 | TensorRT FP16 | 8 | 10.9 | 11.3 | 731.3 | 16340 | 22 | 5808 |
+
+Peak RAM here is higher than for the other models because Firefox and VS Code were open during the ResNet-50 run (system-wide RAM, not the model footprint; each JSON records `idle_ram_used_mb`, and footprint = peak minus idle). Latency and throughput are not affected the same way, but rerun with the desktop closed if exact comparability with the other rows matters.
+
+Figures (PDF + PNG) and full metrics are in `resnet50/figures/`. Desktop-GPU reference timings and the PyTorch row are in `resnet50/README.md`.
 
 ## Protocol and caveats
 
-- **Accuracy:** `02_dump_predictions.py`, same eval transform as training (resize 224, centre-crop 192, ImageNet mean/std). The ONNX rows ran on **ONNX Runtime 1.23.2, CPU provider** (the stock aarch64 wheel has no CUDA); the engine rows ran on the Jetson GPU. FP16 engines differ from the ONNX predictions on a few images only (see per-modality columns). MobileNetV3 ONNX accuracy matches the numbers in its own model README.
+- **Accuracy:** `02_dump_predictions.py`, same eval transform as training (resize 224, centre-crop 192, ImageNet mean/std). The ONNX rows ran on **ONNX Runtime 1.23.2, CPU provider** (the stock aarch64 wheel has no CUDA); the engine rows ran on the Jetson GPU. FP16 engines differ from the ONNX predictions on a few images only (see per-modality columns). MobileNetV3 ONNX accuracy matches the numbers in its own model README. ResNet-50 ONNX CPU predictions here differ from the desktop-CPU run in `resnet50/README.md` by one UAV image (0.9464 vs 0.9467), which is normal between CPU/onnxruntime builds.
 - **RS** has no `fire`-only images and UAV only 35, so per-class and macro-F1 values there are noisy; the RS macro-F1 includes a zero-score class. Report per modality.
 - **Latency:** `benchmark_baseline.py`, 20 warm-up + 100 timed runs per batch size, includes host/device transfer, excludes image decoding/preprocessing. Power is the `VDD_IN` rail from tegrastats during the run; `peak RAM` is whole-system used RAM (it includes about 4.3-4.5 GB of idle usage, so it is not the model footprint).
 - **ORT CUDA** rows use the Jetson AI Lab `onnxruntime-gpu 1.23.0` build with the system JetPack cuBLAS/cuDNN preloaded (pip torch's bundled copies otherwise break it). **ORT CPU** rows use the same build with `--onnx-cpu`.

@@ -1,0 +1,106 @@
+{
+  "baseline": {
+    "name": "resnet50_seed42_trt_fp16",
+    "family": "cnn"
+  },
+  "protocol": {
+    "input": [
+      3,
+      192,
+      192
+    ],
+    "warmup_runs": 20,
+    "timed_runs": 100,
+    "timing_scope": "runtime infer call incl. H2D/D2H transfer; preprocessing excluded",
+    "git_commit": "b6b9188cc448145510dab3c8ade24435e01fadcf"
+  },
+  "environment": {
+    "platform": "Linux-5.15.148-tegra-aarch64-with-glibc2.35",
+    "python": "3.10.12",
+    "torch": "2.9.0+cu126",
+    "cuda_runtime": "12.6",
+    "device": "Orin",
+    "idle_ram_used_mb": 5454.8046875
+  },
+  "runtimes": {
+    "engine": {
+      "artifact": "/tmp/claude-1000/-home-dronex-Projects-TUBITAK-1002/b830db2b-cf9f-4c4a-adf2-d153c62b611b/scratchpad/art/engines/resnet50_seed42_fp16.engine",
+      "artifact_sha256": "f243c3342184be47553dca25f8b7b49c61725b8a193f5407ac39e047cbf7284f",
+      "artifact_mib": 45.53842544555664,
+      "batches": {
+        "1": {
+          "batch_size": 1,
+          "runs": 100,
+          "mean_batch_ms": 5.3034473700063245,
+          "p50_batch_ms": 5.22179400013556,
+          "p95_batch_ms": 7.047634850141549,
+          "p99_batch_ms": 7.070775649344796,
+          "std_batch_ms": 0.9181712613404167,
+          "mean_ms_per_image": 5.3034473700063245,
+          "throughput_images_per_second": 188.55659917651025,
+          "power": {
+            "rail": "VDD_IN",
+            "samples": 4,
+            "mean_mw": 7048.0,
+            "max_mw": 7390.0
+          },
+          "energy_mj_per_image": 37.37869706380457,
+          "memory": {
+            "samples": 4,
+            "first_ram_mb": 5824.0,
+            "peak_ram_mb": 5824.0,
+            "mean_ram_mb": 5824.0
+          }
+        },
+        "4": {
+          "batch_size": 4,
+          "runs": 100,
+          "mean_batch_ms": 7.472931899937976,
+          "p50_batch_ms": 7.288462499673187,
+          "p95_batch_ms": 9.448338199399586,
+          "p99_batch_ms": 9.500003040739104,
+          "std_batch_ms": 0.9574643741933786,
+          "mean_ms_per_image": 1.868232974984494,
+          "throughput_images_per_second": 535.2651480783867,
+          "power": {
+            "rail": "VDD_IN",
+            "samples": 6,
+            "mean_mw": 11199.5,
+            "max_mw": 13017.0
+          },
+          "energy_mj_per_image": 20.92327520333884,
+          "memory": {
+            "samples": 6,
+            "first_ram_mb": 5826.0,
+            "peak_ram_mb": 5826.0,
+            "mean_ram_mb": 5820.333333333333
+          }
+        },
+        "8": {
+          "batch_size": 8,
+          "runs": 100,
+          "mean_batch_ms": 10.938871269981973,
+          "p50_batch_ms": 10.929766000117525,
+          "p95_batch_ms": 11.341510000147537,
+          "p99_batch_ms": 11.385663660048522,
+          "std_batch_ms": 0.19927754810004578,
+          "mean_ms_per_image": 1.3673589087477467,
+          "throughput_images_per_second": 731.3368813428941,
+          "power": {
+            "rail": "VDD_IN",
+            "samples": 10,
+            "mean_mw": 16340.3,
+            "max_mw": 16909.0
+          },
+          "energy_mj_per_image": 22.343054776610803,
+          "memory": {
+            "samples": 10,
+            "first_ram_mb": 5808.0,
+            "peak_ram_mb": 5808.0,
+            "mean_ram_mb": 5808.0
+          }
+        }
+      }
+    }
+  }
+}

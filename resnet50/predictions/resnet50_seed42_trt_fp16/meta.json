@@ -1,0 +1,35 @@
+{
+  "name": "resnet50_seed42_trt_fp16",
+  "runtime": "tensorrt",
+  "split": "test",
+  "classes": [
+    "fire",
+    "smoke",
+    "both",
+    "neither"
+  ],
+  "counts": {
+    "cv": 15884,
+    "rs": 370,
+    "uav": 4181
+  },
+  "artifact": "/tmp/claude-1000/-home-dronex-Projects-TUBITAK-1002/b830db2b-cf9f-4c4a-adf2-d153c62b611b/scratchpad/art/engines/resnet50_seed42_fp16.engine",
+  "artifact_sha256": "f243c3342184be47553dca25f8b7b49c61725b8a193f5407ac39e047cbf7284f",
+  "img_size": 192,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "limit": null,
+  "seconds": 221.3,
+  "created": "2026-10-21T07:42:37.355207+00:00",
+  "git_commit": "b6b9188cc448145510dab3c8ade24435e01fadcf",
+  "torch": "2.9.0+cu126",
+  "device": "Orin"
+}

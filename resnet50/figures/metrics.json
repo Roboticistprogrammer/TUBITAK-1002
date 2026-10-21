@@ -1,0 +1,326 @@
+{
+  "model": "resnet50_seed42",
+  "runtime": "TensorRT FP16",
+  "domains": {
+    "cv": {
+      "n": 15884,
+      "accuracy": 0.9029841349785949,
+      "accuracy_ci95": [
+        0.898136489549232,
+        0.9075799546713674
+      ],
+      "balanced_accuracy": 0.9074222870194207,
+      "macro_f1_present": 0.8905091420254141,
+      "macro_f1_all4": 0.8905091420254141,
+      "fire_recall": 0.9583931133428981,
+      "any_fire_recall": 0.9873371260781795,
+      "false_alarm_rate": 0.09796418184601255,
+      "per_class": {
+        "fire": {
+          "support": 2091,
+          "predicted": 2810,
+          "precision": 0.7131672597864769,
+          "recall": 0.9583931133428981,
+          "f1": 0.8177922872883087
+        },
+        "smoke": {
+          "support": 3902,
+          "predicted": 3893,
+          "precision": 0.9301310043668122,
+          "recall": 0.9279856483854434,
+          "f1": 0.9290570878768442
+        },
+        "both": {
+          "support": 3358,
+          "predicted": 3007,
+          "precision": 0.9394745593614898,
+          "recall": 0.8412745681953544,
+          "f1": 0.8876669285153181
+        },
+        "neither": {
+          "support": 6533,
+          "predicted": 6174,
+          "precision": 0.9544865565273729,
+          "recall": 0.9020358181539875,
+          "f1": 0.9275202644211852
+        }
+      },
+      "confusion_matrix": [
+        [
+          2004,
+          2,
+          76,
+          9
+        ],
+        [
+          2,
+          3621,
+          16,
+          263
+        ],
+        [
+          475,
+          49,
+          2825,
+          9
+        ],
+        [
+          329,
+          221,
+          90,
+          5893
+        ]
+      ]
+    },
+    "uav": {
+      "n": 4181,
+      "accuracy": 0.9466634776369289,
+      "accuracy_ci95": [
+        0.9392489834967711,
+        0.9535996173164315
+      ],
+      "balanced_accuracy": 0.9082092348154072,
+      "macro_f1_present": 0.9015477267405527,
+      "macro_f1_all4": 0.9015477267405527,
+      "fire_recall": 0.8571428571428571,
+      "any_fire_recall": 0.9715994020926756,
+      "false_alarm_rate": 0.010515773660490736,
+      "per_class": {
+        "fire": {
+          "support": 35,
+          "predicted": 40,
+          "precision": 0.75,
+          "recall": 0.8571428571428571,
+          "f1": 0.7999999999999999
+        },
+        "smoke": {
+          "support": 846,
+          "predicted": 752,
+          "precision": 0.9242021276595744,
+          "recall": 0.8215130023640662,
+          "f1": 0.869837296620776
+        },
+        "both": {
+          "support": 1303,
+          "predicted": 1276,
+          "precision": 0.9851097178683386,
+          "recall": 0.9646968534151957,
+          "f1": 0.9747964327258627
+        },
+        "neither": {
+          "support": 1997,
+          "predicted": 2113,
+          "precision": 0.9351632749645055,
+          "recall": 0.9894842263395093,
+          "f1": 0.9615571776155718
+        }
+      },
+      "confusion_matrix": [
+        [
+          30,
+          0,
+          4,
+          1
+        ],
+        [
+          0,
+          695,
+          15,
+          136
+        ],
+        [
+          9,
+          37,
+          1257,
+          0
+        ],
+        [
+          1,
+          20,
+          0,
+          1976
+        ]
+      ]
+    },
+    "rs": {
+      "n": 370,
+      "accuracy": 0.8540540540540541,
+      "accuracy_ci95": [
+        0.8189189189189189,
+        0.8918918918918919
+      ],
+      "balanced_accuracy": 0.7465472565962349,
+      "macro_f1_present": 0.7531367727518582,
+      "macro_f1_all4": 0.5648525795638937,
+      "fire_recall": null,
+      "any_fire_recall": 0.8691099476439791,
+      "false_alarm_rate": 0.08108108108108109,
+      "per_class": {
+        "fire": {
+          "support": 0,
+          "predicted": 1,
+          "precision": 0.0,
+          "recall": null,
+          "f1": null
+        },
+        "smoke": {
+          "support": 31,
+          "predicted": 27,
+          "precision": 0.5185185185185185,
+          "recall": 0.45161290322580644,
+          "f1": 0.48275862068965514
+        },
+        "both": {
+          "support": 191,
+          "predicted": 188,
+          "precision": 0.8829787234042553,
+          "recall": 0.8691099476439791,
+          "f1": 0.8759894459102903
+        },
+        "neither": {
+          "support": 148,
+          "predicted": 154,
+          "precision": 0.8831168831168831,
+          "recall": 0.918918918918919,
+          "f1": 0.9006622516556292
+        }
+      },
+      "confusion_matrix": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          14,
+          13,
+          4
+        ],
+        [
+          0,
+          11,
+          166,
+          14
+        ],
+        [
+          1,
+          2,
+          9,
+          136
+        ]
+      ]
+    },
+    "macro_avg": {
+      "accuracy": 0.9012338888898593,
+      "accuracy_ci95": [
+        0.8892219285426455,
+        0.9140492270176591
+      ],
+      "macro_f1_present": 0.8483978805059417
+    },
+    "weighted_avg": {
+      "accuracy": 0.9110349889894789
+    }
+  },
+  "onnx_vs_trt_fp16_disagreements": {
+    "cv": 8,
+    "uav": 1,
+    "rs": 0
+  },
+  "mcnemar_vs_students": {
+    "SwinV2-B, KD routed": {
+      "cv": {
+        "only_first_correct": 527,
+        "only_second_correct": 767,
+        "p_value": 2.6882704256495317e-11
+      },
+      "uav": {
+        "only_first_correct": 74,
+        "only_second_correct": 53,
+        "p_value": 0.07553055923069615
+      },
+      "rs": {
+        "only_first_correct": 7,
+        "only_second_correct": 24,
+        "p_value": 0.003326892852783203
+      }
+    },
+    "SwinV2-B, KD uniform": {
+      "cv": {
+        "only_first_correct": 796,
+        "only_second_correct": 1017,
+        "p_value": 2.3041365447852465e-07
+      },
+      "uav": {
+        "only_first_correct": 47,
+        "only_second_correct": 69,
+        "p_value": 0.05072955668288325
+      },
+      "rs": {
+        "only_first_correct": 19,
+        "only_second_correct": 25,
+        "p_value": 0.4513808323961257
+      }
+    },
+    "SwinV2-B, no KD": {
+      "cv": {
+        "only_first_correct": 652,
+        "only_second_correct": 769,
+        "p_value": 0.002078577369411029
+      },
+      "uav": {
+        "only_first_correct": 94,
+        "only_second_correct": 62,
+        "p_value": 0.012813143553546152
+      },
+      "rs": {
+        "only_first_correct": 16,
+        "only_second_correct": 28,
+        "p_value": 0.09614175442061423
+      }
+    }
+  },
+  "deployment_batch1_trt_fp16": {
+    "ResNet-50": {
+      "latency": 5.22179400013556,
+      "energy": 37.37869706380457,
+      "size": 45.53842544555664
+    },
+    "SwinV2-B, KD routed": {
+      "latency": 11.844311499999094,
+      "energy": 156.84660136566418,
+      "size": 173.66320419311523
+    },
+    "SwinV2-B, KD uniform": {
+      "latency": 11.890779500049575,
+      "energy": 153.19961553961164,
+      "size": 173.66850662231445
+    },
+    "SwinV2-B, no KD": {
+      "latency": 11.78096850003385,
+      "energy": 153.66329526657822,
+      "size": 173.6677131652832
+    }
+  },
+  "filename_prefix_check": {
+    "cv": {
+      "n": 15884,
+      "agree": 15884,
+      "pairs": {}
+    },
+    "uav": {
+      "n": 4181,
+      "agree": 4181,
+      "pairs": {}
+    },
+    "rs": {
+      "n": 370,
+      "agree": 179,
+      "pairs": {
+        "prefix smoke \u2192 label both": 191
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "resnet50_seed42_onnx",
+  "runtime": "onnxruntime",
+  "split": "test",
+  "classes": [
+    "fire",
+    "smoke",
+    "both",
+    "neither"
+  ],
+  "counts": {
+    "cv": 15884,
+    "rs": 370,
+    "uav": 4181
+  },
+  "artifact": "/home/dronex/Projects/thesis-comparison/models/baselines/resnet50/seed42/resnet50_seed42.onnx",
+  "artifact_sha256": "bac34c69f0575b5ead298353e1fca26fac09d63130a365709fad0e472144748c",
+  "img_size": 192,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "limit": null,
+  "seconds": 2170.2,
+  "created": "2026-10-21T08:18:57.739696+00:00",
+  "git_commit": "b6b9188cc448145510dab3c8ade24435e01fadcf",
+  "torch": "2.9.0+cu126",
+  "device": "Orin",
+  "providers": [
+    "CPUExecutionProvider"
+  ]
+}
