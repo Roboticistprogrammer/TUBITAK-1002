@@ -76,6 +76,16 @@ accuracy_summary.csv   latency_throughput.csv   (all architectures)
 | mobilenet_v3_large_seed42 | TensorRT FP16 | 4 | 6.2 | 7.9 | 607.3 | 7410 | 12 | 4732 |
 | mobilenet_v3_large_seed42 | TensorRT FP16 | 8 | 7.5 | 8.6 | 1085.8 | 9443 | 9 | 4741 |
 
+## ResNet-50 baseline (23.5M params)
+
+### Accuracy
+
+| model | runtime | CV acc | UAV acc | RS acc | CV macro-F1 | UAV macro-F1 | RS macro-F1 |
+|---|---|---|---|---|---|---|---|
+| resnet50_seed42 | ONNX Runtime (CPU) | 0.9032 | 0.9467 | 0.8541 | 0.8908 | 0.9015 | 0.5649 |
+
+TensorRT FP16 accuracy and Jetson Orin latency / throughput / power are not yet measured for ResNet-50. Desktop reference timings and the PyTorch row are in `resnet50/README.md`.
+
 ## Protocol and caveats
 
 - **Accuracy:** `02_dump_predictions.py`, same eval transform as training (resize 224, centre-crop 192, ImageNet mean/std). The ONNX rows ran on **ONNX Runtime 1.23.2, CPU provider** (the stock aarch64 wheel has no CUDA); the engine rows ran on the Jetson GPU. FP16 engines differ from the ONNX predictions on a few images only (see per-modality columns). MobileNetV3 ONNX accuracy matches the numbers in its own model README.

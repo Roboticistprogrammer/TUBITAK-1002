@@ -1,0 +1,654 @@
+{
+  "protocol": {
+    "classes": [
+      "fire",
+      "smoke",
+      "both",
+      "neither"
+    ],
+    "domains": [
+      "cv",
+      "rs",
+      "uav"
+    ],
+    "classifier_img_size": 192,
+    "epochs": 20,
+    "batch_size": 16,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "selection": "best mean val accuracy over domains",
+    "eval_split": "test",
+    "domain_aggregation": "equal-weight macro average over cv, rs, uav",
+    "split": "test",
+    "preprocessing": {
+      "mode": "resize_center_crop",
+      "resize": 224,
+      "crop": 192,
+      "mean": [
+        0.485,
+        0.456,
+        0.406
+      ],
+      "std": [
+        0.229,
+        0.224,
+        0.225
+      ]
+    },
+    "git_commit": "8431a1c13fe5fecd10ffcd75347a8ee5ab1ee458"
+  },
+  "baseline": {
+    "name": "resnet50_seed42",
+    "family": "cnn",
+    "source": "official",
+    "classes": [
+      "fire",
+      "smoke",
+      "both",
+      "neither"
+    ],
+    "model_name": "torchvision/resnet50",
+    "arch": "resnet50",
+    "epoch": 20,
+    "avg_val": 0.9064165346432733,
+    "train_seed": 42,
+    "recipe": {
+      "optimizer": "AdamW",
+      "lr": 0.0003,
+      "weight_decay": 0.05,
+      "schedule": "cosine",
+      "warmup_epochs": 1,
+      "grad_clip": 1.0
+    }
+  },
+  "models": {
+    "resnet50_seed42_pt": {
+      "family": "cnn",
+      "runtime": "pt",
+      "artifact": "outputs\\baselines\\resnet50\\seed42\\best.pt",
+      "artifact_sha256": "fde3d308aba8978f38a9e541382d722fb307c5c5593238d542fab005b700a165",
+      "domains": {
+        "cv": {
+          "metrics": {
+            "samples": 15884,
+            "accuracy": 0.9031730042810375,
+            "balanced_accuracy": 0.9076957889035432,
+            "macro_precision_present_classes": 0.8845160862173572,
+            "macro_recall_present_classes": 0.9076957889035432,
+            "macro_f1_present_classes": 0.8906975364746842,
+            "per_class": {
+              "fire": {
+                "precision": 0.7127621756132243,
+                "recall": 0.9588713534194165,
+                "f1": 0.817699836867863,
+                "support": 2091
+              },
+              "smoke": {
+                "precision": 0.9299461123941494,
+                "recall": 0.9287544848795489,
+                "f1": 0.9293499166559815,
+                "support": 3902
+              },
+              "both": {
+                "precision": 0.9404127829560586,
+                "recall": 0.8412745681953544,
+                "f1": 0.8880855077019804,
+                "support": 3358
+              },
+              "neither": {
+                "precision": 0.9549432739059968,
+                "recall": 0.901882749119853,
+                "f1": 0.9276548846729119,
+                "support": 6533
+              }
+            },
+            "confusion_matrix": [
+              [
+                2005,
+                2,
+                75,
+                9
+              ],
+              [
+                2,
+                3624,
+                16,
+                260
+              ],
+              [
+                475,
+                49,
+                2825,
+                9
+              ],
+              [
+                331,
+                222,
+                88,
+                5892
+              ]
+            ],
+            "confusion_matrix_normalized": [
+              [
+                0.9588713534194165,
+                0.0009564801530368245,
+                0.035868005738880916,
+                0.00430416068866571
+              ],
+              [
+                0.0005125576627370579,
+                0.9287544848795489,
+                0.004100461301896463,
+                0.06663249615581752
+              ],
+              [
+                0.14145324597974984,
+                0.014592019058963668,
+                0.8412745681953544,
+                0.0026801667659321023
+              ],
+              [
+                0.05066585029848462,
+                0.033981325577835605,
+                0.013470075003826725,
+                0.901882749119853
+              ]
+            ]
+          },
+          "ordered_path_sha256": "3776556cf17116e45f41af7460b1fb2cf1bfd21e7b5abcf72b4a92884a61a640"
+        },
+        "rs": {
+          "metrics": {
+            "samples": 370,
+            "accuracy": 0.8540540540540541,
+            "balanced_accuracy": 0.7465472565962349,
+            "macro_precision_present_classes": 0.7615380416798856,
+            "macro_recall_present_classes": 0.7465472565962349,
+            "macro_f1_present_classes": 0.7531367727518582,
+            "per_class": {
+              "fire": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "smoke": {
+                "precision": 0.5185185185185185,
+                "recall": 0.45161290322580644,
+                "f1": 0.48275862068965514,
+                "support": 31
+              },
+              "both": {
+                "precision": 0.8829787234042553,
+                "recall": 0.8691099476439791,
+                "f1": 0.8759894459102903,
+                "support": 191
+              },
+              "neither": {
+                "precision": 0.8831168831168831,
+                "recall": 0.918918918918919,
+                "f1": 0.9006622516556292,
+                "support": 148
+              }
+            },
+            "confusion_matrix": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                14,
+                13,
+                4
+              ],
+              [
+                0,
+                11,
+                166,
+                14
+              ],
+              [
+                1,
+                2,
+                9,
+                136
+              ]
+            ],
+            "confusion_matrix_normalized": [
+              [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.45161290322580644,
+                0.41935483870967744,
+                0.12903225806451613
+              ],
+              [
+                0.0,
+                0.05759162303664921,
+                0.8691099476439791,
+                0.07329842931937172
+              ],
+              [
+                0.006756756756756757,
+                0.013513513513513514,
+                0.060810810810810814,
+                0.918918918918919
+              ]
+            ]
+          },
+          "ordered_path_sha256": "07466fb47bb52cfed543389c173e6679c910b5bb4a21112966df403f3b375f5f"
+        },
+        "uav": {
+          "metrics": {
+            "samples": 4181,
+            "accuracy": 0.9469026548672567,
+            "balanced_accuracy": 0.9084010997424984,
+            "macro_precision_present_classes": 0.8989293523799082,
+            "macro_recall_present_classes": 0.9084010997424984,
+            "macro_f1_present_classes": 0.901783235562946,
+            "per_class": {
+              "fire": {
+                "precision": 0.75,
+                "recall": 0.8571428571428571,
+                "f1": 0.7999999999999999,
+                "support": 35
+              },
+              "smoke": {
+                "precision": 0.9254327563249002,
+                "recall": 0.8215130023640662,
+                "f1": 0.8703819661865998,
+                "support": 846
+              },
+              "both": {
+                "precision": 0.985121378230227,
+                "recall": 0.965464313123561,
+                "f1": 0.9751937984496124,
+                "support": 1303
+              },
+              "neither": {
+                "precision": 0.9351632749645055,
+                "recall": 0.9894842263395093,
+                "f1": 0.9615571776155718,
+                "support": 1997
+              }
+            },
+            "confusion_matrix": [
+              [
+                30,
+                0,
+                4,
+                1
+              ],
+              [
+                0,
+                695,
+                15,
+                136
+              ],
+              [
+                9,
+                36,
+                1258,
+                0
+              ],
+              [
+                1,
+                20,
+                0,
+                1976
+              ]
+            ],
+            "confusion_matrix_normalized": [
+              [
+                0.8571428571428571,
+                0.0,
+                0.11428571428571428,
+                0.02857142857142857
+              ],
+              [
+                0.0,
+                0.8215130023640662,
+                0.01773049645390071,
+                0.1607565011820331
+              ],
+              [
+                0.006907137375287797,
+                0.02762854950115119,
+                0.965464313123561,
+                0.0
+              ],
+              [
+                0.000500751126690035,
+                0.010015022533800702,
+                0.0,
+                0.9894842263395093
+              ]
+            ]
+          },
+          "ordered_path_sha256": "7090235fde3241539d301b8a1ecf89bab25c5f00daf26f360321c772acf50f05"
+        }
+      },
+      "domain_macro": {
+        "accuracy": 0.9013765710674494,
+        "balanced_accuracy": 0.8542147150807589,
+        "macro_f1_present_classes": 0.8485391815964961
+      }
+    },
+    "resnet50_seed42_onnx": {
+      "family": "cnn",
+      "runtime": "onnx",
+      "artifact": "artifacts\\baselines\\resnet50_seed42.onnx",
+      "artifact_sha256": "bac34c69f0575b5ead298353e1fca26fac09d63130a365709fad0e472144748c",
+      "domains": {
+        "cv": {
+          "metrics": {
+            "samples": 15884,
+            "accuracy": 0.9032359607151851,
+            "balanced_accuracy": 0.9077340561620768,
+            "macro_precision_present_classes": 0.884581279461953,
+            "macro_recall_present_classes": 0.9077340561620768,
+            "macro_f1_present_classes": 0.8907603328366216,
+            "per_class": {
+              "fire": {
+                "precision": 0.7130156472261735,
+                "recall": 0.9588713534194165,
+                "f1": 0.8178666122781969,
+                "support": 2091
+              },
+              "smoke": {
+                "precision": 0.9299461123941494,
+                "recall": 0.9287544848795489,
+                "f1": 0.9293499166559815,
+                "support": 3902
+              },
+              "both": {
+                "precision": 0.9404127829560586,
+                "recall": 0.8412745681953544,
+                "f1": 0.8880855077019804,
+                "support": 3358
+              },
+              "neither": {
+                "precision": 0.9549505752714309,
+                "recall": 0.9020358181539875,
+                "f1": 0.9277392947103275,
+                "support": 6533
+              }
+            },
+            "confusion_matrix": [
+              [
+                2005,
+                2,
+                75,
+                9
+              ],
+              [
+                2,
+                3624,
+                16,
+                260
+              ],
+              [
+                475,
+                49,
+                2825,
+                9
+              ],
+              [
+                330,
+                222,
+                88,
+                5893
+              ]
+            ],
+            "confusion_matrix_normalized": [
+              [
+                0.9588713534194165,
+                0.0009564801530368245,
+                0.035868005738880916,
+                0.00430416068866571
+              ],
+              [
+                0.0005125576627370579,
+                0.9287544848795489,
+                0.004100461301896463,
+                0.06663249615581752
+              ],
+              [
+                0.14145324597974984,
+                0.014592019058963668,
+                0.8412745681953544,
+                0.0026801667659321023
+              ],
+              [
+                0.05051278126435022,
+                0.033981325577835605,
+                0.013470075003826725,
+                0.9020358181539875
+              ]
+            ]
+          },
+          "ordered_path_sha256": "3776556cf17116e45f41af7460b1fb2cf1bfd21e7b5abcf72b4a92884a61a640"
+        },
+        "rs": {
+          "metrics": {
+            "samples": 370,
+            "accuracy": 0.8540540540540541,
+            "balanced_accuracy": 0.7465472565962349,
+            "macro_precision_present_classes": 0.7615380416798856,
+            "macro_recall_present_classes": 0.7465472565962349,
+            "macro_f1_present_classes": 0.7531367727518582,
+            "per_class": {
+              "fire": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "support": 0
+              },
+              "smoke": {
+                "precision": 0.5185185185185185,
+                "recall": 0.45161290322580644,
+                "f1": 0.48275862068965514,
+                "support": 31
+              },
+              "both": {
+                "precision": 0.8829787234042553,
+                "recall": 0.8691099476439791,
+                "f1": 0.8759894459102903,
+                "support": 191
+              },
+              "neither": {
+                "precision": 0.8831168831168831,
+                "recall": 0.918918918918919,
+                "f1": 0.9006622516556292,
+                "support": 148
+              }
+            },
+            "confusion_matrix": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                14,
+                13,
+                4
+              ],
+              [
+                0,
+                11,
+                166,
+                14
+              ],
+              [
+                1,
+                2,
+                9,
+                136
+              ]
+            ],
+            "confusion_matrix_normalized": [
+              [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.45161290322580644,
+                0.41935483870967744,
+                0.12903225806451613
+              ],
+              [
+                0.0,
+                0.05759162303664921,
+                0.8691099476439791,
+                0.07329842931937172
+              ],
+              [
+                0.006756756756756757,
+                0.013513513513513514,
+                0.060810810810810814,
+                0.918918918918919
+              ]
+            ]
+          },
+          "ordered_path_sha256": "07466fb47bb52cfed543389c173e6679c910b5bb4a21112966df403f3b375f5f"
+        },
+        "uav": {
+          "metrics": {
+            "samples": 4181,
+            "accuracy": 0.9466634776369289,
+            "balanced_accuracy": 0.9082092348154072,
+            "macro_precision_present_classes": 0.8986187801231047,
+            "macro_recall_present_classes": 0.9082092348154072,
+            "macro_f1_present_classes": 0.9015477267405527,
+            "per_class": {
+              "fire": {
+                "precision": 0.75,
+                "recall": 0.8571428571428571,
+                "f1": 0.7999999999999999,
+                "support": 35
+              },
+              "smoke": {
+                "precision": 0.9242021276595744,
+                "recall": 0.8215130023640662,
+                "f1": 0.869837296620776,
+                "support": 846
+              },
+              "both": {
+                "precision": 0.9851097178683386,
+                "recall": 0.9646968534151957,
+                "f1": 0.9747964327258627,
+                "support": 1303
+              },
+              "neither": {
+                "precision": 0.9351632749645055,
+                "recall": 0.9894842263395093,
+                "f1": 0.9615571776155718,
+                "support": 1997
+              }
+            },
+            "confusion_matrix": [
+              [
+                30,
+                0,
+                4,
+                1
+              ],
+              [
+                0,
+                695,
+                15,
+                136
+              ],
+              [
+                9,
+                37,
+                1257,
+                0
+              ],
+              [
+                1,
+                20,
+                0,
+                1976
+              ]
+            ],
+            "confusion_matrix_normalized": [
+              [
+                0.8571428571428571,
+                0.0,
+                0.11428571428571428,
+                0.02857142857142857
+              ],
+              [
+                0.0,
+                0.8215130023640662,
+                0.01773049645390071,
+                0.1607565011820331
+              ],
+              [
+                0.006907137375287797,
+                0.0283960092095165,
+                0.9646968534151957,
+                0.0
+              ],
+              [
+                0.000500751126690035,
+                0.010015022533800702,
+                0.0,
+                0.9894842263395093
+              ]
+            ]
+          },
+          "ordered_path_sha256": "7090235fde3241539d301b8a1ecf89bab25c5f00daf26f360321c772acf50f05"
+        }
+      },
+      "domain_macro": {
+        "accuracy": 0.9013178308020561,
+        "balanced_accuracy": 0.8541635158579064,
+        "macro_f1_present_classes": 0.8484816107763441
+      }
+    }
+  },
+  "runtime_agreement": {
+    "onnx": {
+      "cv": {
+        "samples": 15884,
+        "top1_agreement": 0.9999370435658524,
+        "changed_predictions": 1,
+        "mean_absolute_logit_error": 0.005281956400722265,
+        "max_absolute_logit_error": 0.08688902854919434
+      },
+      "rs": {
+        "samples": 370,
+        "top1_agreement": 1.0,
+        "changed_predictions": 0,
+        "mean_absolute_logit_error": 0.004397104494273663,
+        "max_absolute_logit_error": 0.041655778884887695
+      },
+      "uav": {
+        "samples": 4181,
+        "top1_agreement": 0.9997608227696724,
+        "changed_predictions": 1,
+        "mean_absolute_logit_error": 0.003965991083532572,
+        "max_absolute_logit_error": 0.12483727931976318
+      }
+    }
+  }
+}

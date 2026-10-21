@@ -1,0 +1,108 @@
+{
+  "baseline": {
+    "name": "resnet50_seed42",
+    "family": "cnn",
+    "model_name": "torchvision/resnet50",
+    "parameter_count": 23516228
+  },
+  "protocol": {
+    "input": [
+      3,
+      192,
+      192
+    ],
+    "warmup_runs": 20,
+    "timed_runs": 200,
+    "timing_scope": "runtime infer call incl. H2D/D2H transfer; preprocessing excluded",
+    "git_commit": "8431a1c13fe5fecd10ffcd75347a8ee5ab1ee458"
+  },
+  "environment": {
+    "platform": "Windows-10-10.0.26100-SP0",
+    "python": "3.10.20",
+    "torch": "2.14.1+cu130",
+    "cuda_runtime": "13.0",
+    "device": "NVIDIA GeForce RTX 3070"
+  },
+  "runtimes": {
+    "pt": {
+      "artifact": "outputs\\baselines\\resnet50\\seed42\\best.pt",
+      "artifact_sha256": "fde3d308aba8978f38a9e541382d722fb307c5c5593238d542fab005b700a165",
+      "artifact_mib": 89.99686908721924,
+      "batches": {
+        "1": {
+          "batch_size": 1,
+          "runs": 200,
+          "mean_batch_ms": 9.268057501176372,
+          "p50_batch_ms": 8.606049988884479,
+          "p95_batch_ms": 12.074234965257341,
+          "p99_batch_ms": 13.944240006385371,
+          "std_batch_ms": 1.369545837335237,
+          "mean_ms_per_image": 9.268057501176372,
+          "throughput_images_per_second": 107.89747472683163
+        },
+        "4": {
+          "batch_size": 4,
+          "runs": 200,
+          "mean_batch_ms": 9.166805004933849,
+          "p50_batch_ms": 8.630249998532236,
+          "p95_batch_ms": 12.668530055088922,
+          "p99_batch_ms": 15.191505039110776,
+          "std_batch_ms": 1.4283824643257514,
+          "mean_ms_per_image": 2.2917012512334622,
+          "throughput_images_per_second": 436.357051104183
+        },
+        "8": {
+          "batch_size": 8,
+          "runs": 200,
+          "mean_batch_ms": 9.505629505729303,
+          "p50_batch_ms": 9.264649997930974,
+          "p95_batch_ms": 10.98163998685777,
+          "p99_batch_ms": 14.21058301115408,
+          "std_batch_ms": 0.9360208695179916,
+          "mean_ms_per_image": 1.1882036882161628,
+          "throughput_images_per_second": 841.6065443301973
+        }
+      }
+    },
+    "onnx": {
+      "artifact": "artifacts\\baselines\\resnet50_seed42.onnx",
+      "artifact_sha256": "bac34c69f0575b5ead298353e1fca26fac09d63130a365709fad0e472144748c",
+      "artifact_mib": 89.62933921813965,
+      "batches": {
+        "1": {
+          "batch_size": 1,
+          "runs": 200,
+          "mean_batch_ms": 16.006339000887237,
+          "p50_batch_ms": 15.86059998953715,
+          "p95_batch_ms": 16.86016995809041,
+          "p99_batch_ms": 18.8465929380618,
+          "std_batch_ms": 0.7284717595800771,
+          "mean_ms_per_image": 16.006339000887237,
+          "throughput_images_per_second": 62.475248084185246
+        },
+        "4": {
+          "batch_size": 4,
+          "runs": 200,
+          "mean_batch_ms": 61.361883999197744,
+          "p50_batch_ms": 60.24175003403798,
+          "p95_batch_ms": 68.41416994575407,
+          "p99_batch_ms": 88.48454898688937,
+          "std_batch_ms": 4.726898605065591,
+          "mean_ms_per_image": 15.340470999799436,
+          "throughput_images_per_second": 65.18704673494537
+        },
+        "8": {
+          "batch_size": 8,
+          "runs": 200,
+          "mean_batch_ms": 130.5014520039549,
+          "p50_batch_ms": 128.57890001032501,
+          "p95_batch_ms": 142.14859994826838,
+          "p99_batch_ms": 168.30038592335765,
+          "std_batch_ms": 7.488240015992415,
+          "mean_ms_per_image": 16.312681500494364,
+          "throughput_images_per_second": 61.30199991765269
+        }
+      }
+    }
+  }
+}
