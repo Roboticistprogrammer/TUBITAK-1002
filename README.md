@@ -12,6 +12,7 @@ Produced on the `retrain-pipeline` branch: `scripts/pipeline/02_dump_predictions
   predictions/<model>_{onnx,trt_fp16}/{cv,uav,rs}.npz, meta.json   per-image logits, labels, file names
   benchmarks/<model>_{ort_cpu,ort_cuda,trt_fp16}.json              latency percentiles, power, RAM per batch size
 accuracy_summary.csv   latency_throughput.csv   (all architectures)
+comparison/            cross-architecture figures and summary table (see comparison/README.md)
 ```
 
 ## SwinV2-B students (87M params; KD routed, KD uniform, no-KD)
