@@ -119,6 +119,44 @@ def bench(prefix: Path, rt: str):
             "artifact_mib": r.get("artifact_mib"), "batches": sorted(int(k) for k in r["batches"])}
 
 
+def bench_all(prefix: Path, rt: str):
+    f = prefix.parent / f"{prefix.name}_{rt}.json"
+    if not f.exists():
+        return None
+    r = next(iter(json.loads(f.read_text())["runtimes"].values()))
+    return {int(k): {"p50": v["p50_batch_ms"], "fps": v["throughput_images_per_second"]} for k, v in r["batches"].items()}
+
+
+def holm(pvals: dict) -> dict:
+    """Holm step-down adjustment over all keys of ``pvals``."""
+    order = sorted(pvals, key=pvals.get)
+    m, out, running = len(order), {}, 0.0
+    for i, k in enumerate(order):
+        running = max(running, min(1.0, (m - i) * pvals[k]))
+        out[k] = running
+    return out
+
+
+def fig_cross_domain(acc, out):
+    fig, ax = plt.subplots(figsize=(4.6, 3.4), constrained_layout=True)
+    m = np.array([[acc[t][d] * 100 for d in DOMAINS] for t in DOMAINS])
+    ax.imshow(m, cmap=BLUES, vmin=0, vmax=100)
+    for i in range(3):
+        for j in range(3):
+            ax.text(j, i, f"{m[i, j]:.1f}", ha="center", va="center", fontsize=9,
+                    color="white" if m[i, j] > 55 else INK)
+    ax.set_xticks(range(3), [DLABEL[d] for d in DOMAINS])
+    ax.set_yticks(range(3), [f"{d.upper()} teacher" for d in DOMAINS])
+    ax.set_xlabel("Test domain")
+    ax.tick_params(length=0, which="both")
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    ax.set_xticks(np.arange(-.5, 3), minor=True)
+    ax.set_yticks(np.arange(-.5, 3), minor=True)
+    ax.grid(which="minor", color="white", linewidth=2)
+    save(fig, out, "teacher_cross_domain")
+
+
 def save(fig, out, stem):
     fig.savefig(out / f"{stem}.pdf", bbox_inches="tight")
     fig.savefig(out / f"{stem}.png", dpi=200, bbox_inches="tight")
@@ -221,13 +259,24 @@ def main():
         res_onnx[m[0]] = metrics(onnx[m[0]], rng)
 
     pairs = [("kd_routed", "teacher"), ("kd_routed", "kd_uniform"), ("kd_routed", "nokd"),
-             ("kd_uniform", "nokd"), ("kd_routed", "mobilenet")]
+             ("kd_uniform", "nokd"), ("kd_routed", "mobilenet"), ("kd_routed", "resnet50")]
     allp = {**preds, "teacher": teacher_preds}
     mcn = {f"{x} vs {y}": {d: mcnemar(allp[x], allp[y], d) for d in DOMAINS} for x, y in pairs if x in allp and y in allp}
     fp16 = {m[0]: {d: {"changed": int((preds[m[0]][d][0] != onnx[m[0]][d][0]).sum()),
                        "delta_pp": (res[m[0]][d]["acc"] - res_onnx[m[0]][d]["acc"]) * 100} for d in DOMAINS}
             for m in models}
     dep = {m[0]: {rt: bench(ROOT / m[3], rt) for rt in ("ort_cpu", "ort_cuda", "trt_fp16")} for m in models}
+    dep_all = {m[0]: {rt: bench_all(ROOT / m[3], rt) for rt in ("ort_cpu", "ort_cuda", "trt_fp16")} for m in models}
+    flat = {f"{k}|{d}": v[d]["p"] for k, v in mcn.items() for d in DOMAINS}
+    for key, p_adj in holm(flat).items():
+        k, d = key.split("|")
+        mcn[k][d]["p_holm"] = p_adj
+    teacher_dirs = {t: a.teacher_preds / f"teacher_{t}" for t in DOMAINS}
+    cross = {t: {d: float((lambda pr: (pr[0] == pr[1]).mean())(load(teacher_dirs[t], d))) for d in DOMAINS}
+             for t in DOMAINS}
+    teacher_own = {}
+    for t in DOMAINS:
+        teacher_own[t] = metrics({d: load(teacher_dirs[t], d) for d in DOMAINS}, rng)[t]
     hist = []
     for m in models[:3]:
         h = json.loads((a.histories / m[0] / "seed42" / "history.json").read_text())["records"]
@@ -237,12 +286,19 @@ def main():
     numbers = {"teacher": teacher, "models": {m[0]: {"label": m[1], "trt_fp16": res[m[0]], "onnx": res_onnx[m[0]]}
                                               for m in models},
                "retention": {m[0]: res[m[0]]["macro"]["acc"] / teacher["macro"]["acc"] for m in models},
-               "mcnemar": mcn, "fp16_vs_onnx": fp16, "deployment_batch1": dep,
+               "mcnemar": mcn, "n_mcnemar_tests": len(flat), "fp16_vs_onnx": fp16, "deployment_batch1": dep,
+               "deployment_all_batches": dep_all, "teacher_cross_domain": cross,
+               "teacher_own_domain": teacher_own,
                "best_epoch": {m[0]: max(h, key=lambda r: r["avg_val"])["epoch"] for m, h in hist},
                "best_val": {m[0]: max(r["avg_val"] for r in h) for m, h in hist}}
     (a.out / "findings_numbers.json").write_text(json.dumps(numbers, indent=1, default=strip) + "\n")
     fig_accuracy(res, teacher, models, a.out)
     fig_confusion(res["kd_routed"], a.out, "confusion_kd_routed")
+    for k in ("kd_uniform", "nokd", "mobilenet", "resnet50"):
+        if k in res:
+            fig_confusion(res[k], a.out, f"confusion_{k}")
+    fig_confusion(teacher_own, a.out, "confusion_teachers")
+    fig_cross_domain(cross, a.out)
     fig_training(hist, a.out)
     print("wrote", a.out)
 
