@@ -35,6 +35,7 @@ from firecls.baselines.data import build_domain_datasets  # noqa: E402
 from firecls.baselines.preprocessing import IMAGENET_MEAN, IMAGENET_STD  # noqa: E402
 from firecls.baselines.protocol import CLASSES, DOMAINS  # noqa: E402
 from firecls.config import DEFAULT_IMG_SIZE  # noqa: E402
+from firecls.data.plumes import PLUME_INDEX, PlumeDataset  # noqa: E402
 from firecls.deployment.artifacts import git_commit, sha256_file, write_json  # noqa: E402
 from firecls.deployment.runners import OnnxRuntimeRunner, PyTorchRunner, TensorRTRunner  # noqa: E402
 from firecls.transforms import build_eval_transform  # noqa: E402
@@ -51,7 +52,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--split", choices=["val", "test"], default="test")
     parser.add_argument("--dataset-root", type=Path, default=ROOT, help="directory containing datasets/")
     parser.add_argument("--index-root", type=Path, default=ROOT, help="directory containing data_index/")
-    parser.add_argument("--domains", nargs="+", default=DOMAINS, choices=DOMAINS)
+    parser.add_argument("--domains", nargs="+", default=DOMAINS, choices=DOMAINS + ["plume"],
+                        help="plume = the Industrial Plumes test groups (data_index/industrial_plumes.csv); not in the default")
+    parser.add_argument("--family", default=None, help="baseline family of --checkpoint (e.g. cnn); default: SwinV2")
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--num-workers", type=int, default=4)
     parser.add_argument("--img-size", type=int, default=DEFAULT_IMG_SIZE)
@@ -73,6 +76,14 @@ def preprocessing_from_manifest(artifact: Path) -> tuple[list[float], list[float
 
 
 def build_runner(args: argparse.Namespace, device: torch.device):
+    if args.checkpoint and args.family:
+        from firecls.baselines.registry import load_baseline
+
+        loaded = load_baseline(args.family, args.checkpoint, device)
+        spec = loaded.preprocessing
+        if spec["mode"] != "resize_center_crop":
+            raise ValueError(f"{args.family}: only resize_center_crop preprocessing is supported here")
+        return "pytorch", PyTorchRunner(loaded.model, device), args.checkpoint, list(spec["mean"]), list(spec["std"])
     if args.checkpoint:
         from firecls.deployment.model import load_checkpoint_model
 
@@ -93,16 +104,21 @@ def main() -> None:
     kind, runner, artifact, mean, std = build_runner(args, device)
     transform = build_eval_transform(args.img_size, mean, std)
     datasets = build_domain_datasets(
-        args.split, transform, args.dataset_root, args.domains, return_path=True, index_root=args.index_root
-    )
+        args.split, transform, args.dataset_root, [d for d in args.domains if d != "plume"], return_path=True,
+        index_root=args.index_root,
+    ) if any(d != "plume" for d in args.domains) else {}
+    if "plume" in args.domains:
+        datasets["plume"] = PlumeDataset(args.index_root / PLUME_INDEX, args.dataset_root, args.split, CLASSES,
+                                         transform=transform, return_path=True)
 
     out_dir = args.out_root / args.name
     out_dir.mkdir(parents=True, exist_ok=True)
     counts: dict[str, int] = {}
     started = time.time()
     for domain, dataset in datasets.items():
-        if args.limit:
-            dataset = Subset(dataset, range(min(args.limit, len(dataset))))
+        if args.limit:  # evenly spaced, so a smoke test sees every class instead of only the first one in the index
+            step = max(1, len(dataset) // args.limit)
+            dataset = Subset(dataset, range(0, len(dataset), step)[: args.limit])
         loader = DataLoader(
             dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers,
             pin_memory=device.type == "cuda",
