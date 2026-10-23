@@ -204,7 +204,7 @@ class SourceBalancedBatchTests(unittest.TestCase):
 class RecipeTests(unittest.TestCase):
     def test_finetune_recipes_follow_the_protocol(self):
         for kind, base_key, batch in [("kd_routed", "kd", 8), ("kd_uniform", "kd", 8), ("nokd", "nokd", 8),
-                                      ("mobilenet_v3_large", "cnn", 16), ("resnet50", "cnn", 16), ("teacher", "teacher", 16)]:
+                                      ("mobilenet_v3_large", "cnn", 16), ("resnet50", "cnn", 16), ("teacher", "teacher", 8)]:
             r = finetune_recipe(kind)
             self.assertAlmostEqual(r.lr, ORIGINAL[base_key].lr * 0.1)
             self.assertEqual(r.batch_size, batch)

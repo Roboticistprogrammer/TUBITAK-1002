@@ -11,8 +11,10 @@ Where each value comes from:
   iterations per epoch, drop_last).
 * MobileNetV3-Large and ResNet-50: `scripts/cnn/train_classifier.py`: AdamW lr 3e-4, weight decay 0.05, cosine schedule with 1
   warm-up epoch, clipping 1.0, AMP, batch 16 (all recorded in their `history.json`).
-* RS teacher: `scripts/train_teacher.py`: AdamW lr 3e-5, weight decay 0.01, constant lr, no gradient clipping. Its batch size and
-  AMP setting were NOT recorded anywhere; the script default batch 16 is used, with AMP (see the protocol, Deviations).
+* RS teacher: `scripts/train_teacher.py`: AdamW lr 3e-5, weight decay 0.01, constant lr, no gradient clipping. No run log or
+  history records its batch size and AMP setting; the README documents the command `train_teacher.py --dataset rs --epochs 20
+  --batch-size 8 --amp` (the teacher histories have 20 epochs, the script default is 15), so batch 8 with AMP is used. This is
+  documented, not logged (see the protocol, Deviations).
 """
 from __future__ import annotations
 
@@ -38,7 +40,7 @@ class Recipe:
 
 
 ORIGINAL = {
-    "teacher": Recipe(3e-5, 0.01, "constant", 0, None, True, 16, False),
+    "teacher": Recipe(3e-5, 0.01, "constant", 0, None, True, 8, False),
     "kd": Recipe(3e-5, 0.01, "constant", 0, 1.0, False, 8, False),
     "nokd": Recipe(3e-5, 0.01, "constant", 0, 1.0, True, 8, True),
     "cnn": Recipe(3e-4, 0.05, "cosine", 1, 1.0, True, 16, True),

@@ -185,13 +185,13 @@ Implementation: `scripts/finetune_rs_plumes.py` with `src/firecls/finetune/` (da
 
 | Model | lr | weight decay | schedule | clip | AMP | batch | source of the values |
 |---|---|---|---|---|---|---|---|
-| RS teacher | 3e-6 | 0.01 | constant | none | yes | 16 | `train_teacher.py` defaults; **batch size and AMP were not recorded** **[doubt]** |
+| RS teacher | 3e-6 | 0.01 | constant | none | yes | **8** | `train_teacher.py`; batch 8 and AMP from the README command `train_teacher.py --dataset rs --epochs 20 --batch-size 8 --amp` (the teacher histories have 20 epochs, the script default is 15); documented, not logged **[doubt]** |
 | KD students | 3e-6 | 0.01 | constant | 1.0 | no | **8** | `train_student.py`; batch 8 (not the script's 16) from the logs: 7,666 iterations per epoch = 61,323 / 8 |
 | No-KD student | 3e-6 | 0.01 | constant | 1.0 | yes | **8** | `train_classifier.py`; logs: 7,665 iterations (drop_last) |
 | MobileNetV3, ResNet-50 | 3e-5 | 0.05 | cosine, 1 warm-up epoch | 1.0 | yes | 16 | `history.json` args; the warm-up is kept at 1 of the 5 epochs **[doubt]** |
 
-  Peak GPU memory measured on the RTX 3070 (8 GB) in dry runs: teacher 6.9 GB, KD student with three teachers 5.8 GB, no-KD
-  student 2.6 GB; all fit with these settings.
+  Peak GPU memory measured on the RTX 3070 (8 GB) in dry runs: teacher 6.9 GB at batch 16 (less at the batch 8 used), KD student
+  with three teachers 5.8 GB, no-KD student 2.6 GB; all fit with these settings.
 - **Sampler:** normal. RS training becomes about 2,770 positive and 2,540 negative.
 - **Checkpoint selection:** highest mean of (CV 4-class val accuracy, UAV 4-class val accuracy, RS binary val balanced accuracy),
   with RS val = FASDD-RS val + plume val pooled; the two RS parts are logged separately every epoch, validation is FP32. Epoch 0
@@ -204,8 +204,8 @@ Implementation: `scripts/finetune_rs_plumes.py` with `src/firecls/finetune/` (da
 - **Second pre-registered fallback, RS teacher only (source balance):** images of the plume dataset (2,100 plume + 2,100
   non-plume) are 79% of the teacher's RS training data (4,200 of 5,312 images; FASDD-RS train has 1,112). If the fine-tuned
   teacher's **binary balanced accuracy on FASDD-RS val** (selected checkpoint) drops by **more than 2 points** from the before
-  teacher (epoch 0), the teacher is rerun with **source-balanced batches**: every batch of 16 has exactly 8 FASDD-RS train and 8
-  plume-dataset train images (`--source-balanced-batches`; one epoch = 332 batches of 16 = 5,312 images, the size of the
+  teacher (epoch 0), the teacher is rerun with **source-balanced batches**: every batch of 8 has exactly 4 FASDD-RS train and 4
+  plume-dataset train images (`--source-balanced-batches`; one epoch = 664 batches of 8 = 5,312 images, the size of the
   unbalanced epoch; each source is drawn without replacement from a shuffled queue that is reshuffled when exhausted, so FASDD-RS
   is passed about 2.4 times and the plume dataset about 0.6 times per epoch). Both runs are reported. `summary.json` records the
   drop (`fasdd_rs_val_ba_drop_points`) and the flag (`ba_fallback_triggered`).
@@ -257,7 +257,8 @@ Implementation: `scripts/finetune_rs_plumes.py` with `src/firecls/finetune/` (da
 | 2026-10-23 | Split unit changed from site id to 2.5 km site group | nearby site ids cover the same location |
 | 2026-10-23 | Plume-only groups: 19 groups, not 70, and not proportional over the splits (365 / 15 / 33 images) | 70 was a count of site ids; assignment follows the seeded fill |
 | 2026-10-23 | Student batch size 8 (not 16) in the recipe table | recovered from the training logs |
-| 2026-10-23 | Teacher fine-tuning: batch 16 with AMP | original batch size and AMP not recorded; the script default is the best available guess |
+| 2026-10-23 | Teacher fine-tuning: batch 8 with AMP (the first draft of this protocol said 16 with AMP) | no run log records the original; the README documents `--batch-size 8 --amp --epochs 20` for the teachers, consistent with their 20-epoch histories. Found before any training; the 16 was only an assumption. |
+| 2026-10-23 | Control runs of the KD students use the ORIGINAL (not fine-tuned) CV, RS and UAV teachers | the control must contain no plume exposure; a fine-tuned RS teacher has seen plumes. The no-KD student and the CNNs have no teacher. **[doubt]** |
 | 2026-10-23 | "Cap p99 at about 220" implemented as a one-parameter highlight shoulder; target only approximately met | see Section 4 |
 | 2026-10-23 | Added the RS-teacher source-balance fallback and the rule that the KD students are fine-tuned only after the teacher check | requested by Amir: plume images are 79% of the teacher's RS training data |
 
