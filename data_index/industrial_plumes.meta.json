@@ -1,0 +1,167 @@
+{
+  "seed": 42,
+  "excluded_120x119": 24,
+  "groups_total": 562,
+  "groups_with_selected_images": 515,
+  "groups_in_more_than_one_split": 0,
+  "images": {
+    "train/smoke": 2100,
+    "train/neither": 2100,
+    "val/smoke": 450,
+    "val/neither": 450,
+    "test/smoke": 450,
+    "test/neither": 450
+  },
+  "plume_images_in_mixed_groups": 2587,
+  "non_plume_from_same_group": 1005,
+  "non_plume_from_other_group": 1995,
+  "non_plume_same_month_as_matched_plume": 2988,
+  "mean_month_gap": 0.004,
+  "month_histogram": {
+    "smoke": [
+      301,
+      395,
+      235,
+      314,
+      117,
+      181,
+      148,
+      181,
+      187,
+      286,
+      230,
+      425
+    ],
+    "neither": [
+      289,
+      404,
+      235,
+      314,
+      117,
+      181,
+      148,
+      181,
+      187,
+      286,
+      230,
+      428
+    ]
+  },
+  "sites_selected": 574,
+  "per_split": {
+    "train": {
+      "groups": 273,
+      "site_ids": 311,
+      "plume_images": 2100,
+      "non_plume_images": 2100,
+      "plume_only_groups": 13,
+      "plume_images_from_plume_only_groups": 365,
+      "month_histogram": {
+        "smoke": [
+          155,
+          264,
+          180,
+          251,
+          92,
+          145,
+          127,
+          160,
+          156,
+          200,
+          135,
+          235
+        ],
+        "neither": [
+          155,
+          264,
+          180,
+          251,
+          92,
+          145,
+          127,
+          160,
+          156,
+          200,
+          135,
+          235
+        ]
+      }
+    },
+    "val": {
+      "groups": 118,
+      "site_ids": 124,
+      "plume_images": 450,
+      "non_plume_images": 450,
+      "plume_only_groups": 2,
+      "plume_images_from_plume_only_groups": 15,
+      "month_histogram": {
+        "smoke": [
+          83,
+          65,
+          23,
+          28,
+          13,
+          21,
+          13,
+          13,
+          13,
+          47,
+          39,
+          92
+        ],
+        "neither": [
+          71,
+          74,
+          23,
+          28,
+          13,
+          21,
+          13,
+          13,
+          13,
+          47,
+          39,
+          95
+        ]
+      }
+    },
+    "test": {
+      "groups": 124,
+      "site_ids": 139,
+      "plume_images": 450,
+      "non_plume_images": 450,
+      "plume_only_groups": 4,
+      "plume_images_from_plume_only_groups": 33,
+      "month_histogram": {
+        "smoke": [
+          63,
+          66,
+          32,
+          35,
+          12,
+          15,
+          8,
+          8,
+          18,
+          39,
+          56,
+          98
+        ],
+        "neither": [
+          63,
+          66,
+          32,
+          35,
+          12,
+          15,
+          8,
+          8,
+          18,
+          39,
+          56,
+          98
+        ]
+      }
+    }
+  }
+}
