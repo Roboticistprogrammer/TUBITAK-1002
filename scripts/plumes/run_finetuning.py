@@ -4,7 +4,8 @@
 
 Order: (1) RS teacher; its check (FASDD-RS val binary balanced accuracy drop > 2 points -> rerun with source-balanced batches; if
 that also fails, STOP); (2) KD routed and KD uniform with the first teacher run that passes; (3) no-KD student, MobileNetV3-Large,
-ResNet-50; (4) controls without plume images: KD routed (with the ORIGINAL CV / RS / UAV teachers) and MobileNetV3-Large.
+ResNet-50; the symmetric control teacher (RS teacher fine-tuned on FASDD-RS train only, no plumes) runs right after KD uniform;
+(4) controls without plume images: KD routed (original CV and UAV teachers, the control RS teacher) and MobileNetV3-Large.
 Every model other than the teacher: if the binary recall on FASDD-RS val `both` images of the selected checkpoint drops by more
 than 2 points from the before model, it is rerun with the class-balanced RS sampler into `<name>_balanced_rs` and both are kept.
 The driver STOPS (writes STOP.txt and exits) when a run fails, when neither teacher run passes the balanced-accuracy check, or when
@@ -44,8 +45,23 @@ def main() -> None:
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num-workers", type=int, default=4)
+    parser.add_argument("--wait-for-idle", action="store_true",
+                        help="first wait until no finetune_rs_plumes.py process is running (used to take over from an older driver "
+                             "whose current run is still going); finished runs are skipped afterwards")
     args = parser.parse_args()
     args.out_root.mkdir(parents=True, exist_ok=True)
+    if args.wait_for_idle:
+        import time
+
+        def busy() -> bool:
+            out = subprocess.run(["powershell", "-NoProfile", "-Command",
+                                  "(Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Where-Object "
+                                  "{ $_.CommandLine -match 'finetune_rs_plumes' } | Measure-Object).Count"],
+                                 capture_output=True, text=True).stdout.strip()
+            return out not in ("", "0")
+
+        while busy():
+            time.sleep(60)
     log_path, decisions_path = args.out_root / "driver.log", args.out_root / "driver_decisions.json"
     decisions: dict = json.loads(decisions_path.read_text()) if decisions_path.exists() else {}
 
@@ -113,13 +129,20 @@ def main() -> None:
         # 2. KD students with the fine-tuned teacher
         with_fallback("kd_routed", "kd_routed", kd)
         with_fallback("kd_uniform", "kd_uniform", kd)
+        # 2b. symmetric control teacher: the RS teacher fine-tuned the same way on FASDD-RS train only (no plume images); short
+        #     (1,112 images per epoch); it is the RS teacher of the control KD student, and its validation numbers are reported
+        #     next to the treatment teacher's. The control arm is not subject to the fallbacks.
+        run("teacher_rs_noplume", "teacher", ["--no-plumes"])
         # 3. students without a teacher, and the CNN baselines
         with_fallback("nokd", "nokd", [])
         with_fallback("mobilenet_v3_large", "mobilenet_v3_large", [])
         with_fallback("resnet50", "resnet50", [])
-        # 4. controls: the same fine-tuning without plume images (KD control with the original teachers)
-        original = ["--cv-teacher", str(TEACHERS["cv"]), "--rs-teacher", str(TEACHERS["rs"]), "--uav-teacher", str(TEACHERS["uav"])]
-        run("kd_routed_noplume", "kd_routed", original + ["--no-plumes"])
+        # 4. controls: the same fine-tuning without plume images. CV and UAV teachers are the originals in both arms; the control
+        #    KD student's RS teacher is the control RS teacher.
+        control_teacher = args.out_root / "teacher_rs_noplume" / f"seed{args.seed}" / "best.pt"
+        decide("control_teacher_used_by_kd_control", str(control_teacher))
+        control_kd = ["--cv-teacher", str(TEACHERS["cv"]), "--rs-teacher", str(control_teacher), "--uav-teacher", str(TEACHERS["uav"])]
+        run("kd_routed_noplume", "kd_routed", control_kd + ["--no-plumes"])
         run("mobilenet_v3_large_noplume", "mobilenet_v3_large", ["--no-plumes"])
         log("ALL RUNS FINISHED")
     except Stop as stop:

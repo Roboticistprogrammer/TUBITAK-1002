@@ -214,7 +214,18 @@ Implementation: `scripts/finetune_rs_plumes.py` with `src/firecls/finetune/` (da
   that passes; if neither passes, stop and ask Amir. (The `both`-recall fallback above is also evaluated for the teacher and
   reported; if it triggers for the teacher, stop and ask Amir rather than start a third teacher run **[doubt]**.) The teacher
   checkpoint used is recorded in each student's `meta` (`rs_teacher_sha256`).
-- **Control:** for the routed student and MobileNetV3-Large, the same fine-tuning **without** plume images (`--no-plumes`).
+- **Control (symmetric, decided by Amir on 2026-10-24):** for the routed student and MobileNetV3-Large, the same fine-tuning
+  **without** plume images (`--no-plumes`), so that plume images are the **only** difference between treatment and control at the
+  teacher level as well as at the student level:
+  - **Control RS teacher** (`teacher_rs_noplume`): the RS teacher fine-tuned with identical settings (5 epochs, lr/10, batch 8, AMP,
+    same selection rule, FASDD-RS val + plume val pooled) on **FASDD-RS train only** (1,112 images, 139 iterations per epoch; the
+    treatment teacher sees 5,312 images, 664 iterations per epoch, because epochs are passes over each arm's own data).
+  - **Control KD-routed student** (`kd_routed_noplume`): fine-tuned on FASDD train (CV + RS + UAV) without plume images, with the
+    **control RS teacher** as its RS teacher; the CV and UAV teachers are the original ones in **both** arms (treatment: fine-tuned RS
+    teacher; control: control RS teacher).
+  - **Control MobileNetV3-Large** (`mobilenet_v3_large_noplume`): has no teacher.
+  - The control teacher's validation numbers are reported next to the treatment teacher's (`scripts/plumes/compare_runs.py`). The
+    control runs are not subject to the fallbacks (they are the reference arm); their `summary.json` still records the drops.
 - **Seeds:** 42 for all; 43 and 44 later for the routed student and MobileNetV3-Large at least. (Checkpoints present locally: KD
   routed and KD uniform seeds 42 and 43; no-KD seed 42; MobileNetV3-Large and ResNet-50 seed 42 only; the seed-44 directories hold
   only a `DONE` marker. Seeds 43 and 44 of MobileNetV3-Large would first have to be trained.)
@@ -258,7 +269,8 @@ Implementation: `scripts/finetune_rs_plumes.py` with `src/firecls/finetune/` (da
 | 2026-10-23 | Plume-only groups: 19 groups, not 70, and not proportional over the splits (365 / 15 / 33 images) | 70 was a count of site ids; assignment follows the seeded fill |
 | 2026-10-23 | Student batch size 8 (not 16) in the recipe table | recovered from the training logs |
 | 2026-10-23 | Teacher fine-tuning: batch 8 with AMP (the first draft of this protocol said 16 with AMP) | no run log records the original; the README documents `--batch-size 8 --amp --epochs 20` for the teachers, consistent with their 20-epoch histories. Found before any training; the 16 was only an assumption. |
-| 2026-10-23 | Control runs of the KD students use the ORIGINAL (not fine-tuned) CV, RS and UAV teachers | the control must contain no plume exposure; a fine-tuned RS teacher has seen plumes. The no-KD student and the CNNs have no teacher. **[doubt]** |
+| 2026-10-23 | Control runs of the KD students use the ORIGINAL (not fine-tuned) CV, RS and UAV teachers. **Superseded on 2026-10-24 by the next row; this version was never run.** | the control must contain no plume exposure; a fine-tuned RS teacher has seen plumes. |
+| 2026-10-24 | Control KD-routed student uses a CONTROL RS teacher (fine-tuned with identical settings on FASDD-RS train only, no plumes); CV and UAV teachers are the originals in both arms | requested by Amir: plume images become the only difference between treatment and control at teacher and student level. Doubt closed. The control teacher runs right after KD uniform, before the no-KD student. |
 | 2026-10-23 | "Cap p99 at about 220" implemented as a one-parameter highlight shoulder; target only approximately met | see Section 4 |
 | 2026-10-23 | Added the RS-teacher source-balance fallback and the rule that the KD students are fine-tuned only after the teacher check | requested by Amir: plume images are 79% of the teacher's RS training data |
 
