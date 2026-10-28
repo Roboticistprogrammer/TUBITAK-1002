@@ -1,0 +1,5 @@
+{
+  "teacher_ba_check": "normal teacher run passed: FASDD-RS val BA drop -0.62 pts (<= 2)",
+  "teacher_used_by_kd_students": "D:\\Thesis-Project\\TUBITAK-1002\\outputs\\plume_finetune\\teacher_rs\\seed42\\best.pt",
+  "control_teacher_used_by_kd_control": "D:\\Thesis-Project\\TUBITAK-1002\\outputs\\plume_finetune\\teacher_rs_noplume\\seed42\\best.pt"
+}

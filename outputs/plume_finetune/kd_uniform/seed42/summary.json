@@ -1,0 +1,15 @@
+{
+  "fasdd_rs_val_binary_ba_before": 0.9358943212875797,
+  "fasdd_rs_val_binary_ba_best": 0.9454638627391437,
+  "fasdd_rs_val_ba_drop_points": -0.9569541451564079,
+  "ba_fallback_triggered": false,
+  "best_epoch": 5,
+  "best_selection_score": 0.9126514515330292,
+  "before_selection_score": 0.8706700692811493,
+  "fasdd_rs_val_both_recall_before": 0.9343832020997376,
+  "fasdd_rs_val_both_recall_best": 0.937007874015748,
+  "both_recall_drop_points": -0.2624671916010457,
+  "fallback_triggered": false,
+  "seconds": 21535.619341611862,
+  "peak_gpu_memory_gb": 5.782097339630127
+}
