@@ -1,0 +1,36 @@
+{
+  "name": "resnet50_finetuned_seed42_trt_fp16",
+  "runtime": "tensorrt",
+  "split": "test",
+  "classes": [
+    "fire",
+    "smoke",
+    "both",
+    "neither"
+  ],
+  "counts": {
+    "cv": 15884,
+    "rs": 370,
+    "uav": 4181,
+    "plume": 900
+  },
+  "artifact": "/home/dronex/Projects/TUBITAK-1002/artifacts/engines/resnet50_finetuned_seed42_fp16.engine",
+  "artifact_sha256": "2fee5ee60d80a5565f1f21fa147a33388e4cc4b48cbb7249d769eec4bf113b60",
+  "img_size": 192,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "limit": null,
+  "seconds": 172.1,
+  "created": "2026-10-30T09:44:38.604494+00:00",
+  "git_commit": "539f2f962ac07ed0218d4df8c946477a6e6fdafd",
+  "torch": "2.9.0+cu126",
+  "device": "Orin"
+}

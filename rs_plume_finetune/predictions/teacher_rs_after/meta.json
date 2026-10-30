@@ -1,0 +1,34 @@
+{
+  "name": "teacher_rs_after",
+  "runtime": "pytorch",
+  "split": "test",
+  "classes": [
+    "fire",
+    "smoke",
+    "both",
+    "neither"
+  ],
+  "counts": {
+    "rs": 370,
+    "plume": 900
+  },
+  "artifact": "D:\\Thesis-Project\\models\\plume_finetune\\seed42\\teacher_rs\\best.pt",
+  "artifact_sha256": "9bf577733d11913d948bdd8559d52091a2594c6d6c3def620e24e7d8dfac6229",
+  "img_size": 192,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "limit": null,
+  "seconds": 72.3,
+  "created": "2026-10-30T08:25:12.660946+00:00",
+  "git_commit": "539f2f962ac07ed0218d4df8c946477a6e6fdafd",
+  "torch": "2.14.1+cu130",
+  "device": "NVIDIA GeForce RTX 3070"
+}

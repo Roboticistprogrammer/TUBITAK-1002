@@ -1,0 +1,8 @@
+only_a_correct,only_b_correct,p_value,a,b,p_value_holm,significant_holm_0.05,significant
+11,52,1.6734991187261193e-07,kd_routed_seed42_trt_fp16,kd_routed_finetuned_seed42_trt_fp16,1.0040994712356716e-06,True,yes
+56,22,0.00014948153872378,kd_uniform_seed42_trt_fp16,kd_uniform_finetuned_seed42_trt_fp16,0.0007474076936189,True,yes
+27,85,3.5803042787075065e-08,nokd_seed42_trt_fp16,nokd_finetuned_seed42_trt_fp16,2.506212995095255e-07,True,yes
+27,22,0.5681724128491751,mobilenet_v3_large_seed42_trt_fp16,mobilenet_v3_large_finetuned_seed42_trt_fp16,0.6301188468933134,False,no (inconclusive)
+19,31,0.11892045255943896,resnet50_seed42_trt_fp16,resnet50_finetuned_seed42_trt_fp16,0.47568181023775585,False,no (inconclusive)
+15,8,0.2100396156311045,kd_routed_finetuned_seed42_trt_fp16,kd_routed_noplume_seed42_trt_fp16,0.6301188468933134,False,no (inconclusive)
+30,40,0.2819789217936538,mobilenet_v3_large_finetuned_seed42_trt_fp16,mobilenet_v3_large_noplume_seed42_trt_fp16,0.6301188468933134,False,no (inconclusive)

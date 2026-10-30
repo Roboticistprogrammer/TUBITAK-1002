@@ -1,0 +1,34 @@
+{
+  "name": "teacher_rs_before",
+  "runtime": "pytorch",
+  "split": "test",
+  "classes": [
+    "fire",
+    "smoke",
+    "both",
+    "neither"
+  ],
+  "counts": {
+    "rs": 370,
+    "plume": 900
+  },
+  "artifact": "D:\\Thesis-Project\\TUBITAK-1002\\outputs\\teachers\\FASDD_RS\\best.pt",
+  "artifact_sha256": "a325443cec5cf8e5c9713269a64f26fce05006e3d2a75e67c96cbf8b67a8713a",
+  "img_size": 192,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "limit": null,
+  "seconds": 83.1,
+  "created": "2026-10-30T08:23:27.376629+00:00",
+  "git_commit": "539f2f962ac07ed0218d4df8c946477a6e6fdafd",
+  "torch": "2.14.1+cu130",
+  "device": "NVIDIA GeForce RTX 3070"
+}

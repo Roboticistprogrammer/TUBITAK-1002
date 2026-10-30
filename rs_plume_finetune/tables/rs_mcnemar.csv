@@ -1,0 +1,10 @@
+a,b,a_right_b_wrong,a_wrong_b_right,p_unadjusted,balanced_accuracy_diff_a_minus_b,p_holm,balanced_accuracy_diff_pct,significant
+teacher_rs_before,teacher_rs_after,6,3,0.5078125,0.0045045045045045695,1.0,0.5,no (inconclusive)
+kd_routed_seed42_trt_fp16,kd_routed_finetuned_seed42_trt_fp16,7,3,0.34375,0.007882882882882858,1.0,0.8,no (inconclusive)
+kd_uniform_seed42_trt_fp16,kd_uniform_finetuned_seed42_trt_fp16,3,7,0.34375,-0.013513513513513487,1.0,-1.4,no (inconclusive)
+nokd_seed42_trt_fp16,nokd_finetuned_seed42_trt_fp16,5,11,0.210113525390625,-0.019144144144144004,1.0,-1.9,no (inconclusive)
+mobilenet_v3_large_seed42_trt_fp16,mobilenet_v3_large_finetuned_seed42_trt_fp16,6,7,1.0,0.0011261261261261701,1.0,0.1,no (inconclusive)
+resnet50_seed42_trt_fp16,resnet50_finetuned_seed42_trt_fp16,5,5,1.0,-0.0011261261261261701,1.0,-0.1,no (inconclusive)
+teacher_rs_after,teacher_rs_noplume_after,1,3,0.625,-0.00563063063063074,1.0,-0.6,no (inconclusive)
+kd_routed_finetuned_seed42_trt_fp16,kd_routed_noplume_seed42_trt_fp16,3,9,0.14599609375,-0.014639639639639657,1.0,-1.5,no (inconclusive)
+mobilenet_v3_large_finetuned_seed42_trt_fp16,mobilenet_v3_large_noplume_seed42_trt_fp16,9,7,0.803619384765625,0.0022522522522522292,1.0,0.2,no (inconclusive)

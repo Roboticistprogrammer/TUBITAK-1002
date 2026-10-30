@@ -1,0 +1,7 @@
+label,before_tp,before_fn,before_fp,before_tn,after_tp,after_fn,after_fp,after_tn
+RS teacher,216,6,8,140,211,11,6,142
+KD routed,212,10,7,141,207,15,6,142
+KD uniform,206,16,11,137,206,16,7,141
+No KD,210,12,14,134,211,11,9,139
+MobileNetV3-Large,207,15,11,137,211,11,14,134
+ResNet-50,204,18,12,136,203,19,11,137

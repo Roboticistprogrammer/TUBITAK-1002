@@ -1,0 +1,33 @@
+# Binary smoke/fire vs neither: rs
+
+| Model | Recall % (95% CI) | False-alarm % (95% CI) | Balanced acc. % (95% CI) | F1 % | ROC-AUC | Errors | Recall smoke % (n) | Recall both % (n) |
+|---|---|---|---|---|---|---|---|---|
+| teacher_rs_before | 97.3 [94.9, 99.1] | 5.4 [2.1, 9.3] | 95.9 [93.8, 97.8] | 96.9 | 0.9921 | 14/370  90.3 (31) | 98.4 (191) |
+| teacher_rs_after | 95.0 [92.1, 97.7] | 4.1 [1.3, 7.6] | 95.5 [93.3, 97.5] | 96.1 | 0.9932 | 17/370  83.9 (31) | 96.9 (191) |
+| teacher_rs_noplume_after | 95.5 [92.6, 98.2] | 3.4 [0.7, 6.7] | 96.1 [93.9, 98.0] | 96.6 | 0.9928 | 15/370  90.3 (31) | 96.3 (191) |
+| kd_routed_seed42_trt_fp16 | 95.5 [92.4, 98.1] | 4.7 [1.5, 8.6] | 95.4 [93.0, 97.5] | 96.1 | 0.9845 | 17/370  93.5 (31) | 95.8 (191) |
+| kd_routed_finetuned_seed42_trt_fp16 | 93.2 [89.7, 96.4] | 4.1 [1.3, 7.6] | 94.6 [92.1, 96.8] | 95.2 | 0.984 | 21/370  83.9 (31) | 94.8 (191) |
+| kd_routed_noplume_seed42_trt_fp16 | 95.5 [92.4, 98.1] | 3.4 [0.7, 6.5] | 96.1 [93.9, 97.9] | 96.6 | 0.9838 | 15/370  93.5 (31) | 95.8 (191) |
+| kd_uniform_seed42_trt_fp16 | 92.8 [89.2, 96.1] | 7.4 [3.4, 11.8] | 92.7 [90.0, 95.3] | 93.8 | 0.9655 | 27/370  90.3 (31) | 93.2 (191) |
+| kd_uniform_finetuned_seed42_trt_fp16 | 92.8 [89.2, 95.9] | 4.7 [1.5, 8.4] | 94.0 [91.5, 96.3] | 94.7 | 0.9661 | 23/370  87.1 (31) | 93.7 (191) |
+| nokd_seed42_trt_fp16 | 94.6 [91.4, 97.3] | 9.5 [5.1, 14.6] | 92.6 [89.5, 95.2] | 94.2 | 0.9643 | 26/370  93.5 (31) | 94.8 (191) |
+| nokd_finetuned_seed42_trt_fp16 | 95.0 [91.9, 97.8] | 6.1 [2.5, 10.5] | 94.5 [92.0, 96.8] | 95.5 | 0.9741 | 20/370  87.1 (31) | 96.3 (191) |
+| mobilenet_v3_large_seed42_trt_fp16 | 93.2 [89.9, 96.3] | 7.4 [3.6, 11.6] | 92.9 [90.3, 95.4] | 94.1 | 0.9691 | 26/370  90.3 (31) | 93.7 (191) |
+| mobilenet_v3_large_finetuned_seed42_trt_fp16 | 95.0 [92.1, 97.8] | 9.5 [4.9, 14.2] | 92.8 [90.1, 95.5] | 94.4 | 0.9681 | 25/370  87.1 (31) | 96.3 (191) |
+| mobilenet_v3_large_noplume_seed42_trt_fp16 | 93.2 [89.7, 96.4] | 8.1 [4.1, 12.6] | 92.6 [89.9, 95.3] | 93.9 | 0.9702 | 27/370  93.5 (31) | 93.2 (191) |
+| resnet50_seed42_trt_fp16 | 91.9 [88.0, 95.4] | 8.1 [3.9, 12.4] | 91.9 [89.1, 94.8] | 93.2 | 0.9666 | 30/370  87.1 (31) | 92.7 (191) |
+| resnet50_finetuned_seed42_trt_fp16 | 91.4 [87.7, 95.0] | 7.4 [3.5, 11.6] | 92.0 [89.1, 94.7] | 93.1 | 0.9697 | 30/370  80.6 (31) | 93.2 (191) |
+
+## Exact McNemar on binary correctness (Holm-corrected within this test set)
+
+| A | B | A-only correct | B-only correct | BA diff (A-B) pp | p | p (Holm) | significant |
+|---|---|---|---|---|---|---|---|
+| teacher_rs_before | teacher_rs_after | 6 | 3 | +0.5 | 0.5078 | 1 | no (inconclusive) |
+| kd_routed_seed42_trt_fp16 | kd_routed_finetuned_seed42_trt_fp16 | 7 | 3 | +0.8 | 0.3438 | 1 | no (inconclusive) |
+| kd_uniform_seed42_trt_fp16 | kd_uniform_finetuned_seed42_trt_fp16 | 3 | 7 | -1.4 | 0.3438 | 1 | no (inconclusive) |
+| nokd_seed42_trt_fp16 | nokd_finetuned_seed42_trt_fp16 | 5 | 11 | -1.9 | 0.2101 | 1 | no (inconclusive) |
+| mobilenet_v3_large_seed42_trt_fp16 | mobilenet_v3_large_finetuned_seed42_trt_fp16 | 6 | 7 | +0.1 | 1 | 1 | no (inconclusive) |
+| resnet50_seed42_trt_fp16 | resnet50_finetuned_seed42_trt_fp16 | 5 | 5 | -0.1 | 1 | 1 | no (inconclusive) |
+| teacher_rs_after | teacher_rs_noplume_after | 1 | 3 | -0.6 | 0.625 | 1 | no (inconclusive) |
+| kd_routed_finetuned_seed42_trt_fp16 | kd_routed_noplume_seed42_trt_fp16 | 3 | 9 | -1.5 | 0.146 | 1 | no (inconclusive) |
+| mobilenet_v3_large_finetuned_seed42_trt_fp16 | mobilenet_v3_large_noplume_seed42_trt_fp16 | 9 | 7 | +0.2 | 0.8036 | 1 | no (inconclusive) |

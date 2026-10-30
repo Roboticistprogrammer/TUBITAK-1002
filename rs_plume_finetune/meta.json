@@ -1,0 +1,33 @@
+{
+  "protocol": "external/PLUME_PROTOCOL.md, Section 8",
+  "protocol_commit": "539f2f962ac07ed0218d4df8c946477a6e6fdafd",
+  "protocol_commit_short": "539f2f9",
+  "seed": 42,
+  "evaluation_date": "2026-10-30",
+  "bootstrap_resamples": 2000,
+  "mcnemar": "exact two-sided, Holm-corrected within each test set",
+  "machines": {
+    "jetson": "NVIDIA Jetson Orin Nano (8GB, L4T 36.4.7, TensorRT 10.3.0) - TensorRT FP16 engines + dumps for all non-teacher models, cv/rs/uav/plume",
+    "main": "RTX 3070 (PyTorch 2.14.1+cu130) - PyTorch FP32 dumps for teacher_rs (before/after/noplume_after), rs/plume"
+  },
+  "test_sets": {
+    "cv": 15884,
+    "uav": 4181,
+    "rs": 370,
+    "plume": 900
+  },
+  "models": [
+    "kd_routed", "kd_uniform", "nokd", "mobilenet_v3_large", "resnet50",
+    "kd_routed_noplume (control)", "mobilenet_v3_large_noplume (control)",
+    "teacher_rs (SwinV2-L, PyTorch FP32)", "teacher_rs_noplume (control, PyTorch FP32)"
+  ],
+  "gate_check": "FASDD-RS before-model binary results reproduced exactly against PLUME_PROTOCOL.md Section 1 reference table for all 6 before models (teacher, kd_routed, kd_uniform, nokd, mobilenet_v3_large, resnet50); see tables/rs_binary.md rows suffixed 'before' / unsuffixed baseline names.",
+  "deviations": [
+    "ResNet-50's before (non-fine-tuned) TensorRT FP16 engine did not exist on any branch and was built fresh on the Jetson from the original seed-42 ONNX (thesis-comparison/models/baselines/resnet50/seed42/resnet50_seed42.onnx); this was needed to dump the before model on the plume test, which the protocol also requires.",
+    "kd_routed, kd_uniform, nokd, and kd_routed_noplume (all SwinV2-B) could not be built as dynamic-batch (1-8) TensorRT engines: trtexec fails with 'Could not find any implementation for node onnx::Gather_...' for this architecture under a dynamic shape profile. Built as static batch=1 engines instead (matching the pre-existing before-engines, which were already static batch=1 for the same reason) and dumped with --batch-size 1. Does not affect accuracy; only throughput, which is out of scope here.",
+    "After-model TensorRT engines were written with explicit distinguishing filenames (e.g. kd_routed_finetuned_seed42_fp16.engine, resnet50_finetuned_seed42_fp16.engine) instead of 04_build_engines.sh's auto-derived name, because the after ONNX files share identical basenames with their before counterparts and would otherwise silently overwrite the before engine.",
+    "The CV/UAV 4-class accuracy, macro-F1, bootstrap CIs and McNemar/Holm computation used a standalone script (not committed; reuses the exact class_metrics/bootstrap_ci/mcnemar_exact formulas from scripts/pipeline/08_compute_statistics.py, adapted to this task's before/after/noplume naming) since the protocol names scripts/evaluate_rs_binary.py only for the rs/plume binary metrics and does not name a script for the 4-class forgetting check.",
+    "Dataset root for the Jetson dumps was assembled as a symlink farm (thesis-comparison/dataset_root) mapping the amir-salar/test-dataset clone's class-subfoldered cv/uav/rs layout to the flat datasets/<DOMAIN>/images/<file> layout firecls's CSV index resolver expects; no image content was altered.",
+    "The Jetson's desktop GUI (gdm/display-manager) and several minor daemons were stopped (headless mode, user-approved) partway through to free enough memory for the SwinV2-B engine builds; reversible, commands recorded separately."
+  ]
+}
