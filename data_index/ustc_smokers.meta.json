@@ -1,0 +1,35 @@
+{
+  "dataset": "USTC_SmokeRS",
+  "classes6": [
+    "smoke",
+    "cloud",
+    "dust",
+    "haze",
+    "land",
+    "seaside"
+  ],
+  "positive_class": "smoke",
+  "counts": {
+    "smoke": 1016,
+    "cloud": 1164,
+    "dust": 1009,
+    "haze": 1002,
+    "land": 1027,
+    "seaside": 1007
+  },
+  "total": 6225,
+  "expected_total": 6225,
+  "split": "all images are test",
+  "format_sample": {
+    "modes": {
+      "RGB": 1248
+    },
+    "sizes": {
+      "256x256": 1248
+    },
+    "dtypes": {
+      "uint8": 1248
+    }
+  },
+  "created": "2026-10-22T16:35:01.359207+00:00"
+}
