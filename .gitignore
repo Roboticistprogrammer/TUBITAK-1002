@@ -61,3 +61,11 @@ runs/
 datasets_yolo/
 pseudo_masks/
 third_party/weights/
+
+# Local working state (machine-specific, kept out of every branch)
+.claude/
+preds_before/
+outputs/plume_finetune/
+outputs/retrain/
+.python_cache/
+results/
