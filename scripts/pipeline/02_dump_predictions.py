@@ -10,6 +10,15 @@ Run teachers with --checkpoint on the main machine; run the engine on the Jetson
         --engine artifacts/engines/kd_uniform_seed42_fp16.engine --dataset-root /data/fasdd
 
 Output: <out-root>/<name>/<domain>.npz (logits, labels, names, classes) + <out-root>/<name>/meta.json.
+
+External validation (external/USTC_PROTOCOL.md): add --dataset ustc to run the same artifact on data_index/ustc_smokers.csv
+instead of the FASDD domains (add --preprocessing full_resize and a separate --out-root for the secondary
+preprocessing of the protocol). It writes <out-root>/<name>/ustc.npz (logits, labels6, labels_bin, names, classes,
+classes6) and meta.json. A torchvision CNN checkpoint (ResNet-50, MobileNetV3) needs --family cnn.
+
+    python scripts/pipeline/02_dump_predictions.py --dataset ustc --name teacher_rs \
+        --checkpoint outputs/teachers/FASDD_RS/best.pt --limit 50
+
 Naming convention used by the statistics script: <group>_seed<N>[_<suffix>], e.g. kd_uniform_seed42,
 kd_routed_seed43, nokd_seed44; teachers as teacher_cv / teacher_rs / teacher_uav (no seed).
 """
@@ -17,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -36,8 +46,9 @@ from firecls.baselines.preprocessing import IMAGENET_MEAN, IMAGENET_STD  # noqa:
 from firecls.baselines.protocol import CLASSES, DOMAINS  # noqa: E402
 from firecls.config import DEFAULT_IMG_SIZE  # noqa: E402
 from firecls.deployment.artifacts import git_commit, sha256_file, write_json  # noqa: E402
+from firecls.data.ustc import USTC_CLASSES, USTC_INDEX, UstcDataset  # noqa: E402
 from firecls.deployment.runners import OnnxRuntimeRunner, PyTorchRunner, TensorRTRunner  # noqa: E402
-from firecls.transforms import build_eval_transform  # noqa: E402
+from firecls.transforms import build_eval_transform, build_full_resize_transform  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -47,6 +58,15 @@ def parse_args() -> argparse.Namespace:
     source.add_argument("--checkpoint", type=Path)
     source.add_argument("--onnx", type=Path)
     source.add_argument("--engine", type=Path)
+    parser.add_argument("--family", default=None, help="baseline family of --checkpoint (e.g. cnn); default: SwinV2")
+    parser.add_argument("--dataset", choices=["fasdd", "ustc"], default="fasdd")
+    parser.add_argument("--ustc-dir", type=Path, default=None,
+                        help="USTC only: folder holding <class>/<file>.tif, e.g. test-dataset/ustc_smokers; "
+                             "default is datasets/USTC_SmokeRS beneath --dataset-root")
+    parser.add_argument("--preprocessing", choices=["primary", "full_resize"], default="primary",
+                        help="USTC only. primary = resize 224 + centre crop 192 (the FASDD transform); "
+                             "full_resize = whole image resized to 192x192 (secondary sensitivity analysis). "
+                             "Write each setting to its own --out-root.")
     parser.add_argument("--out-root", type=Path, default=Path("preds"))
     parser.add_argument("--split", choices=["val", "test"], default="test")
     parser.add_argument("--dataset-root", type=Path, default=ROOT, help="directory containing datasets/")
@@ -73,6 +93,14 @@ def preprocessing_from_manifest(artifact: Path) -> tuple[list[float], list[float
 
 
 def build_runner(args: argparse.Namespace, device: torch.device):
+    if args.checkpoint and args.family:
+        from firecls.baselines.registry import load_baseline
+
+        loaded = load_baseline(args.family, args.checkpoint, device)
+        spec = loaded.preprocessing
+        if spec["mode"] != "resize_center_crop":
+            raise ValueError(f"{args.family}: only resize_center_crop preprocessing is supported here")
+        return "pytorch", PyTorchRunner(loaded.model, device), args.checkpoint, list(spec["mean"]), list(spec["std"])
     if args.checkpoint:
         from firecls.deployment.model import load_checkpoint_model
 
@@ -87,19 +115,64 @@ def build_runner(args: argparse.Namespace, device: torch.device):
     return "tensorrt", TensorRTRunner(args.engine, device), args.engine, mean, std
 
 
+def dump_ustc(args: argparse.Namespace, runner, transform, device: torch.device, out_dir: Path) -> dict[str, int]:
+    """Logits on every USTC_SmokeRS image (all are `test`); the binary rule is applied later by evaluate_external.py."""
+    index = args.index_root / USTC_INDEX
+    if not index.exists():
+        raise FileNotFoundError(f"{index} missing; run scripts/build_ustc_index.py first.")
+    dataset = UstcDataset(index, args.dataset_root, transform, images_dir=args.ustc_dir)
+    if len(dataset) == 0:
+        raise ValueError(f"No test rows in {index}")
+    if args.limit:  # evenly spaced, so a smoke test sees every class instead of only the first one
+        step = max(1, len(dataset) // args.limit)
+        dataset = Subset(dataset, range(0, len(dataset), step)[: args.limit])
+    loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers,
+                        pin_memory=device.type == "cuda")
+    logits, labels6, labels_bin, names = [], [], [], []
+    for step, (images, batch6, batch_bin, batch_paths) in enumerate(loader, 1):
+        batch_logits = runner.infer(images)
+        if batch_logits.ndim != 2 or batch_logits.shape[1] != len(CLASSES):
+            raise ValueError(f"expected logits [batch,{len(CLASSES)}], got {batch_logits.shape}")
+        logits.append(batch_logits)
+        labels6.extend(batch6.tolist())
+        labels_bin.extend(batch_bin.tolist())
+        names.extend("/".join(Path(p.replace("\\", "/")).parts[-2:]) for p in batch_paths)  # class folder / file
+        if step % 50 == 0:
+            print(f"[ustc] {step * args.batch_size}/{len(dataset)}", flush=True)
+    logits = np.concatenate(logits).astype(np.float32)
+    np.savez_compressed(
+        out_dir / "ustc.npz", logits=logits, labels6=np.asarray(labels6, dtype=np.int64),
+        labels_bin=np.asarray(labels_bin, dtype=np.int64), names=np.asarray(names),
+        classes=np.asarray(CLASSES), classes6=np.asarray(USTC_CLASSES),
+    )
+    predicted = np.bincount(logits.argmax(1), minlength=len(CLASSES))
+    print(f"[ustc] saved {len(labels6)} predictions; predicted-class counts "
+          f"{dict(zip(CLASSES, predicted.tolist()))}")
+    if len(labels6) >= 20 and predicted.max() >= 0.95 * len(labels6):
+        print("WARNING: >=95% of predictions are one class; check preprocessing before going on (external/README.md, Phase 3).")
+    return {"ustc": len(labels6)}
+
+
 def main() -> None:
     args = parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     kind, runner, artifact, mean, std = build_runner(args, device)
-    transform = build_eval_transform(args.img_size, mean, std)
-    datasets = build_domain_datasets(
-        args.split, transform, args.dataset_root, args.domains, return_path=True, index_root=args.index_root
-    )
+    if args.preprocessing != "primary" and args.dataset != "ustc":
+        raise SystemExit("--preprocessing full_resize is only defined for --dataset ustc")
+    build_transform = build_full_resize_transform if args.preprocessing == "full_resize" else build_eval_transform
+    transform = build_transform(args.img_size, mean, std)
 
     out_dir = args.out_root / args.name
     out_dir.mkdir(parents=True, exist_ok=True)
     counts: dict[str, int] = {}
     started = time.time()
+    if args.dataset == "ustc":
+        datasets = {}
+        counts = dump_ustc(args, runner, transform, device, out_dir)
+    else:
+        datasets = build_domain_datasets(
+            args.split, transform, args.dataset_root, args.domains, return_path=True, index_root=args.index_root
+        )
     for domain, dataset in datasets.items():
         if args.limit:
             dataset = Subset(dataset, range(min(args.limit, len(dataset))))
@@ -127,12 +200,21 @@ def main() -> None:
         print(f"[{domain}] saved {len(labels)} predictions, accuracy {(logits.argmax(1) == np.asarray(labels)).mean():.4f}")
 
     meta = {
-        "name": args.name, "runtime": kind, "split": args.split, "classes": CLASSES, "counts": counts,
+        "name": args.name, "runtime": kind, "dataset": args.dataset, "preprocessing": args.preprocessing, "family": args.family,
+        "split": "test" if args.dataset == "ustc" else args.split, "classes": CLASSES, "counts": counts,
         "artifact": str(artifact), "artifact_sha256": sha256_file(artifact), "img_size": args.img_size,
         "mean": mean, "std": std, "limit": args.limit, "seconds": round(time.time() - started, 1),
         "created": datetime.now(timezone.utc).isoformat(), "git_commit": git_commit(ROOT),
         "torch": torch.__version__, "device": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu",
     }
+    try:  # tracked files that differ from git_commit; a real run should have this empty
+        meta["git_dirty_files"] = subprocess.check_output(
+            ["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
+        ).splitlines()
+    except (OSError, subprocess.CalledProcessError):
+        meta["git_dirty_files"] = None
+    if args.dataset == "ustc":
+        meta["index_sha256"] = sha256_file(args.index_root / USTC_INDEX)
     if kind == "onnxruntime":
         meta["providers"] = runner.providers
     write_json(out_dir / "meta.json", meta)
