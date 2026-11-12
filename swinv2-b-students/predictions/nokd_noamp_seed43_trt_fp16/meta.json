@@ -1,0 +1,35 @@
+{
+  "name": "nokd_noamp_seed43_trt_fp16",
+  "runtime": "tensorrt",
+  "split": "test",
+  "classes": [
+    "fire",
+    "smoke",
+    "both",
+    "neither"
+  ],
+  "counts": {
+    "cv": 15884,
+    "rs": 370,
+    "uav": 4181
+  },
+  "artifact": "artifacts/engines/nokd_noamp_seed43_fp16.engine",
+  "artifact_sha256": "592a4f0bfa81f83b7e446130c154a23bfc260deb29d125d90e6ea029a73927f8",
+  "img_size": 192,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "limit": null,
+  "seconds": 320.4,
+  "created": "2026-11-12T18:40:39.989140+00:00",
+  "git_commit": "ae4382d871727a62eefbf9d06e16b2673f505d12",
+  "torch": "2.9.0+cu126",
+  "device": "Orin"
+}

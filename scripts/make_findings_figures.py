@@ -1,12 +1,18 @@
 """Numbers and figures for the thesis Findings chapter (all evaluated models, one consistent style).
 
     python scripts/make_findings_figures.py --teacher-preds <dir with teacher_{cv,uav,rs}/> \
-        --histories <dir with {kd_routed,kd_uniform,nokd}/seed42/history.json> --out <thesis>/Figures/Findings
+        --histories <dir with {kd_routed,kd_uniform,nokd_noamp}/seed<N>/history.json> --out <thesis>/Figures/Findings
 
 Accuracy of deployable models uses their TensorRT FP16 predictions on the Jetson; the teachers are
-not deployed and use their PyTorch FP32 predictions. Writes ``findings_numbers.json`` (every value
-quoted in the chapter) and three PDF figures. Baselines still training (ResNet-50, YOLO11n) are picked
-up automatically once ``<arch>/predictions/<model>_trt_fp16`` exists, keeping their fixed colours.
+not deployed and use their PyTorch FP32 predictions. The three retrained students (KD routed, KD
+uniform, no-KD) have seeds 42/43/44 on the Hub; wherever more than one seed's predictions are
+present under --teacher-preds's sibling predictions dirs, figures and findings_numbers.json report
+the mean +- SD across seeds instead of a single run, and confusion matrices are pooled (summed)
+over seeds. The no-KD baseline is `nokd_noamp` (trained without AMP, like the KD students) per the
+Jetson handoff; the original AMP `nokd` run is kept on the Hub for the record but is not plotted.
+Writes ``findings_numbers.json`` (every value quoted in the chapter) and three PDF figures.
+Baselines still training (ResNet-50, YOLO11n) are picked up automatically once
+``<arch>/predictions/<model>_seed42_trt_fp16`` exists, keeping their fixed colours.
 """
 from __future__ import annotations
 
@@ -27,14 +33,17 @@ CLASSES = ["fire", "smoke", "both", "neither"]
 DOMAINS = ["cv", "uav", "rs"]
 DLABEL = {"cv": "CV (ground)", "uav": "UAV", "rs": "RS (satellite)"}
 # Fixed entity -> colour (validated categorical order, light surface). Never re-ordered.
-MODELS = [  # key, label, predictions dir, benchmark prefix, colour
-    ("kd_routed", "Student, KD routed", "swinv2-b-students/predictions/kd_routed_seed42", "swinv2-b-students/benchmarks/kd_routed_seed42", "#2a78d6"),
-    ("kd_uniform", "Student, KD uniform", "swinv2-b-students/predictions/kd_uniform_seed42", "swinv2-b-students/benchmarks/kd_uniform_seed42", "#eb6834"),
-    ("nokd", "Student, no KD", "swinv2-b-students/predictions/nokd_seed42", "swinv2-b-students/benchmarks/nokd_seed42", "#1baf7a"),
-    ("mobilenet", "MobileNetV3-Large", "mobilenet_v3_large/predictions/mobilenet_v3_large_seed42", "mobilenet_v3_large/benchmarks/mobilenet_v3_large_seed42", "#eda100"),
-    ("resnet50", "ResNet-50", "resnet50/predictions/resnet50_seed42", "resnet50/benchmarks/resnet50_seed42", "#e87ba4"),
-    ("yolo11n", "YOLO11n", "yolo11n/predictions/yolo11n_coco_seed42", "yolo11n/benchmarks/yolo11n_coco_seed42", "#008300"),
+# Prediction/benchmark path prefixes exclude the seed suffix; it is appended as "_seed<N>".
+MODELS = [  # key, label, predictions prefix, benchmark prefix, colour
+    ("kd_routed", "Student, KD routed", "swinv2-b-students/predictions/kd_routed", "swinv2-b-students/benchmarks/kd_routed", "#2a78d6"),
+    ("kd_uniform", "Student, KD uniform", "swinv2-b-students/predictions/kd_uniform", "swinv2-b-students/benchmarks/kd_uniform", "#eb6834"),
+    ("nokd_noamp", "Student, no KD", "swinv2-b-students/predictions/nokd_noamp", "swinv2-b-students/benchmarks/nokd_noamp", "#1baf7a"),
+    ("mobilenet", "MobileNetV3-Large", "mobilenet_v3_large/predictions/mobilenet_v3_large", "mobilenet_v3_large/benchmarks/mobilenet_v3_large", "#eda100"),
+    ("resnet50", "ResNet-50", "resnet50/predictions/resnet50", "resnet50/benchmarks/resnet50", "#e87ba4"),
+    ("yolo11n", "YOLO11n", "yolo11n/predictions/yolo11n_coco", "yolo11n/benchmarks/yolo11n_coco", "#008300"),
 ]
+# Seeds to look for per model key; models not listed default to seed 42 only.
+SEEDS = {"kd_routed": [42, 43, 44], "kd_uniform": [42, 43, 44], "nokd_noamp": [42, 43, 44]}
 INK, INK2, MUTED, GRID, AXIS = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
 BLUES = LinearSegmentedColormap.from_list("b", ["#f4f8fd", "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf",
                                                "#184f95", "#0d366b"])
@@ -137,6 +146,49 @@ def holm(pvals: dict) -> dict:
     return out
 
 
+def mean_std(values: list[float]) -> dict:
+    arr = np.asarray(values, dtype=float)
+    return {"mean": float(arr.mean()), "std": float(arr.std(ddof=1)) if len(arr) > 1 else None,
+            "n": int(len(arr)), "values": [float(v) for v in values]}
+
+
+def load_seeds(prefix: Path, seeds: list[int], rng) -> dict[int, dict]:
+    """{seed: metrics(...)} for every seed whose *_trt_fp16 predictions exist."""
+    out = {}
+    for seed in seeds:
+        d = ROOT / f"{prefix}_seed{seed}_trt_fp16"
+        if (d / f"{DOMAINS[0]}.npz").exists():
+            out[seed] = metrics({dom: load(d, dom) for dom in DOMAINS}, rng)
+    return out
+
+
+def aggregate(per_seed: dict[int, dict]) -> dict:
+    """Mean +- SD across seeds for accuracy/macro-F1 (n=1 falls back to that run's bootstrap CI)."""
+    runs = list(per_seed.values())
+    agg = {"seeds": sorted(per_seed), "n": len(runs)}
+    for key in DOMAINS + ["macro", "weighted"]:
+        accs = [r[key]["acc"] for r in runs]
+        stat = mean_std(accs)
+        if stat["n"] > 1 or "ci" not in runs[0][key]:
+            lo, hi = stat["mean"] - (stat["std"] or 0.0), stat["mean"] + (stat["std"] or 0.0)
+        else:
+            lo, hi = runs[0][key]["ci"]
+        entry = {"acc": stat, "lo": lo, "hi": hi}
+        if key != "weighted":
+            entry["macro_f1"] = mean_std([r[key]["macro_f1"] for r in runs])
+        agg[key] = entry
+    return agg
+
+
+def pool_confusion(per_seed: dict[int, dict]) -> dict:
+    """Confusion matrices summed over seeds, for a single pooled confusion-matrix figure."""
+    pooled = {}
+    for d in DOMAINS:
+        cm = np.sum([np.array(r[d]["cm"]) for r in per_seed.values()], axis=0)
+        pooled[d] = {"cm": cm.tolist(), "acc": float(np.trace(cm) / cm.sum()) if cm.sum() else 0.0}
+    return pooled
+
+
 def fig_cross_domain(acc, out):
     fig, ax = plt.subplots(figsize=(4.6, 3.4), constrained_layout=True)
     m = np.array([[acc[t][d] * 100 for d in DOMAINS] for t in DOMAINS])
@@ -163,19 +215,22 @@ def save(fig, out, stem):
     plt.close(fig)
 
 
-def fig_accuracy(res, teacher, models, out):
+def fig_accuracy(agg, teacher, models, out):
+    """``agg[key]`` entries carry acc/lo/hi; lo/hi is mean+-SD for multi-seed groups, bootstrap CI otherwise."""
     fig, axes = plt.subplots(1, 4, figsize=(10.6, 0.55 * len(models) + 1.4), sharey=True, constrained_layout=True)
     ys = np.arange(len(models))[::-1]
     for ax, key, title in zip(axes, DOMAINS + ["macro"], [DLABEL[d] for d in DOMAINS] + ["Macro average"]):
-        lo = [res[m[0]][key]["ci"][0] * 100 for m in models]
-        hi = [res[m[0]][key]["ci"][1] * 100 for m in models]
+        lo = [agg[m[0]][key]["lo"] * 100 for m in models]
+        hi = [agg[m[0]][key]["hi"] * 100 for m in models]
         t = teacher[key]["acc"] * 100
         span = max(max(hi), t) - min(min(lo), t)
         for y, m, a, b in zip(ys, models, lo, hi):
-            v = res[m[0]][key]["acc"] * 100
+            v = agg[m[0]][key]["acc"]["mean"] * 100
+            n = agg[m[0]]["n"]
             ax.plot([a, b], [y, y], color=m[4], lw=2, solid_capstyle="round", zorder=2)
             ax.plot(v, y, "o", ms=7, color=m[4], mec="white", mew=1.5, zorder=3)
-            ax.text(b + 0.05 * span, y, f"{v:.1f}", va="center", fontsize=7.5, color=INK, zorder=4,
+            label = f"{v:.1f}" + (" (3 seeds)" if n > 1 else "")
+            ax.text(b + 0.05 * span, y, label, va="center", fontsize=7.5, color=INK, zorder=4,
                     bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none"))
         ax.axvline(t, color=MUTED, lw=1.2, ls=(0, (3, 2)), zorder=1)
         ax.text(t, len(models) - 0.45, f"teacher {t:.1f}", ha="center", va="bottom", fontsize=7, color=INK2)
@@ -220,16 +275,20 @@ def fig_confusion(r, out, stem):
     save(fig, out, stem)
 
 
-def fig_training(hist, out):
+def fig_training(hist_by_model, out):
+    """``hist_by_model``: model -> {seed: records}. Each seed plots as its own curve (same colour)."""
     fig, axes = plt.subplots(1, 4, figsize=(10.6, 2.8), sharex=True, constrained_layout=True)
     for ax, key, title in zip(axes, ["avg"] + DOMAINS, ["Mean over domains"] + [DLABEL[d] for d in DOMAINS]):
-        for m, recs in hist:
-            ep = [r["epoch"] for r in recs]
-            v = [(r["avg_val"] if key == "avg" else r["val_acc"][key]) * 100 for r in recs]
-            ax.plot(ep, v, color=m[4], lw=2, label=m[1], zorder=3)
-            if key == "avg":
-                best = max(recs, key=lambda r: r["avg_val"])
-                ax.plot(best["epoch"], best["avg_val"] * 100, "o", ms=7, color=m[4], mec="white", mew=1.5, zorder=4)
+        for m, by_seed in hist_by_model:
+            for i, (seed, recs) in enumerate(sorted(by_seed.items())):
+                ep = [r["epoch"] for r in recs]
+                v = [(r["avg_val"] if key == "avg" else r["val_acc"][key]) * 100 for r in recs]
+                ax.plot(ep, v, color=m[4], lw=2 if i == 0 else 1.1, alpha=1.0 if i == 0 else 0.45,
+                        label=m[1] if i == 0 else None, zorder=3)
+                if key == "avg":
+                    best = max(recs, key=lambda r: r["avg_val"])
+                    ax.plot(best["epoch"], best["avg_val"] * 100, "o", ms=6 if i == 0 else 4, color=m[4],
+                            mec="white", mew=1.2, zorder=4, alpha=1.0 if i == 0 else 0.6)
         ax.set_title(title)
         ax.set_xlabel("Epoch")
         ax.yaxis.grid(True, zorder=0)
@@ -250,23 +309,36 @@ def main():
 
     teacher_preds = {d: load(a.teacher_preds / f"teacher_{d}", d) for d in DOMAINS}
     teacher = metrics(teacher_preds, rng)
-    models = [m for m in MODELS if (ROOT / f"{m[2]}_trt_fp16").exists()]
-    preds, onnx, res, res_onnx = {}, {}, {}, {}
-    for m in models:
-        preds[m[0]] = {d: load(ROOT / f"{m[2]}_trt_fp16", d) for d in DOMAINS}
-        onnx[m[0]] = {d: load(ROOT / f"{m[2]}_onnx", d) for d in DOMAINS}
-        res[m[0]] = metrics(preds[m[0]], rng)
-        res_onnx[m[0]] = metrics(onnx[m[0]], rng)
+    models = [m for m in MODELS if (ROOT / f"{m[2]}_seed42_trt_fp16").exists()]
+    per_seed = {m[0]: load_seeds(ROOT / m[2], SEEDS.get(m[0], [42]), rng) for m in models}
+    agg = {key: aggregate(runs) for key, runs in per_seed.items()}
+    preds42 = {m[0]: {d: load(ROOT / f"{m[2]}_seed42_trt_fp16", d) for d in DOMAINS} for m in models}
+    onnx42 = {m[0]: {d: load(ROOT / f"{m[2]}_seed42_onnx", d) for d in DOMAINS}
+              for m in models if (ROOT / f"{m[2]}_seed42_onnx").exists()}
+    res_onnx42 = {k: metrics(v, rng) for k, v in onnx42.items()}
 
-    pairs = [("kd_routed", "teacher"), ("kd_routed", "kd_uniform"), ("kd_routed", "nokd"),
-             ("kd_uniform", "nokd"), ("kd_routed", "mobilenet"), ("kd_routed", "resnet50")]
-    allp = {**preds, "teacher": teacher_preds}
-    mcn = {f"{x} vs {y}": {d: mcnemar(allp[x], allp[y], d) for d in DOMAINS} for x, y in pairs if x in allp and y in allp}
-    fp16 = {m[0]: {d: {"changed": int((preds[m[0]][d][0] != onnx[m[0]][d][0]).sum()),
-                       "delta_pp": (res[m[0]][d]["acc"] - res_onnx[m[0]][d]["acc"]) * 100} for d in DOMAINS}
-            for m in models}
-    dep = {m[0]: {rt: bench(ROOT / m[3], rt) for rt in ("ort_cpu", "ort_cuda", "trt_fp16")} for m in models}
-    dep_all = {m[0]: {rt: bench_all(ROOT / m[3], rt) for rt in ("ort_cpu", "ort_cuda", "trt_fp16")} for m in models}
+    # Family of significance tests: KD vs nokd_noamp over every shared seed and domain (the thesis's
+    # KD-vs-no-KD claim, Holm-corrected together), plus the fixed seed-42-only comparators below.
+    allp = {**preds42, "teacher": teacher_preds}
+    # mcnemar() takes raw (pred, label, name) tuples per domain, not metrics(); reload per-seed preds for the pairs.
+    preds_by_seed = {m[0]: {s: {d: load(ROOT / f"{m[2]}_seed{s}_trt_fp16", d) for d in DOMAINS} for s in SEEDS.get(m[0], [42])
+                             if (ROOT / f"{m[2]}_seed{s}_trt_fp16" / f"{DOMAINS[0]}.npz").exists()} for m in models}
+    pairs = [("kd_routed", "nokd_noamp"), ("kd_uniform", "nokd_noamp"), ("kd_routed", "kd_uniform")]
+    mcn = {}
+    for x, y in pairs:
+        shared_seeds = sorted(set(preds_by_seed.get(x, {})) & set(preds_by_seed.get(y, {})))
+        for s in shared_seeds:
+            tag = f"{x} vs {y}" if len(shared_seeds) == 1 else f"{x} vs {y} (seed {s})"
+            mcn[tag] = {d: mcnemar(preds_by_seed[x][s], preds_by_seed[y][s], d) for d in DOMAINS}
+    for x, y in [("kd_routed", "teacher"), ("kd_routed", "mobilenet"), ("kd_routed", "resnet50")]:
+        if x in preds42 and y in allp:
+            mcn[f"{x} vs {y}"] = {d: mcnemar(preds42[x], allp[y], d) for d in DOMAINS}
+
+    fp16 = {k: {d: {"changed": int((preds42[k][d][0] != onnx42[k][d][0]).sum()),
+                    "delta_pp": (per_seed[k][42][d]["acc"] - res_onnx42[k][d]["acc"]) * 100} for d in DOMAINS}
+            for k in onnx42 if 42 in per_seed.get(k, {})}
+    dep = {m[0]: {rt: bench(ROOT / f"{m[3]}_seed42", rt) for rt in ("ort_cpu", "ort_cuda", "trt_fp16")} for m in models}
+    dep_all = {m[0]: {rt: bench_all(ROOT / f"{m[3]}_seed42", rt) for rt in ("ort_cpu", "ort_cuda", "trt_fp16")} for m in models}
     flat = {f"{k}|{d}": v[d]["p"] for k, v in mcn.items() for d in DOMAINS}
     for key, p_adj in holm(flat).items():
         k, d = key.split("|")
@@ -277,29 +349,38 @@ def main():
     teacher_own = {}
     for t in DOMAINS:
         teacher_own[t] = metrics({d: load(teacher_dirs[t], d) for d in DOMAINS}, rng)[t]
-    hist = []
+
+    hist_by_model = []
     for m in models[:3]:
-        h = json.loads((a.histories / m[0] / "seed42" / "history.json").read_text())["records"]
-        hist.append((m, h))
+        by_seed = {}
+        for seed in SEEDS.get(m[0], [42]):
+            f = a.histories / m[0] / f"seed{seed}" / "history.json"
+            if f.exists():
+                by_seed[seed] = json.loads(f.read_text())["records"]
+        if by_seed:
+            hist_by_model.append((m, by_seed))
 
     strip = lambda r: {k: v for k, v in r.items()}
-    numbers = {"teacher": teacher, "models": {m[0]: {"label": m[1], "trt_fp16": res[m[0]], "onnx": res_onnx[m[0]]}
-                                              for m in models},
-               "retention": {m[0]: res[m[0]]["macro"]["acc"] / teacher["macro"]["acc"] for m in models},
+    numbers = {"teacher": teacher,
+               "models": {m[0]: {"label": m[1], "seeds": agg[m[0]]["seeds"], "trt_fp16": agg[m[0]]}
+                          for m in models},
+               "retention": {m[0]: agg[m[0]]["macro"]["acc"]["mean"] / teacher["macro"]["acc"] for m in models},
                "mcnemar": mcn, "n_mcnemar_tests": len(flat), "fp16_vs_onnx": fp16, "deployment_batch1": dep,
                "deployment_all_batches": dep_all, "teacher_cross_domain": cross,
                "teacher_own_domain": teacher_own,
-               "best_epoch": {m[0]: max(h, key=lambda r: r["avg_val"])["epoch"] for m, h in hist},
-               "best_val": {m[0]: max(r["avg_val"] for r in h) for m, h in hist}}
+               "best_epoch": {m[0]: {s: max(h, key=lambda r: r["avg_val"])["epoch"] for s, h in by_seed.items()}
+                              for m, by_seed in hist_by_model},
+               "best_val": {m[0]: {s: max(r["avg_val"] for r in h) for s, h in by_seed.items()}
+                            for m, by_seed in hist_by_model}}
     (a.out / "findings_numbers.json").write_text(json.dumps(numbers, indent=1, default=strip) + "\n")
-    fig_accuracy(res, teacher, models, a.out)
-    fig_confusion(res["kd_routed"], a.out, "confusion_kd_routed")
-    for k in ("kd_uniform", "nokd", "mobilenet", "resnet50"):
-        if k in res:
-            fig_confusion(res[k], a.out, f"confusion_{k}")
+    fig_accuracy(agg, teacher, models, a.out)
+    fig_confusion(pool_confusion(per_seed["kd_routed"]), a.out, "confusion_kd_routed")
+    for k in ("kd_uniform", "nokd_noamp", "mobilenet", "resnet50"):
+        if k in per_seed and per_seed[k]:
+            fig_confusion(pool_confusion(per_seed[k]), a.out, f"confusion_{k}")
     fig_confusion(teacher_own, a.out, "confusion_teachers")
     fig_cross_domain(cross, a.out)
-    fig_training(hist, a.out)
+    fig_training(hist_by_model, a.out)
     print("wrote", a.out)
 
 
