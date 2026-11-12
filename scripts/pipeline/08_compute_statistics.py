@@ -14,9 +14,11 @@ Per run and domain: accuracy, balanced accuracy, per-class precision/recall/F1/s
 classes present, confusion matrix, fire-class recall, any-fire recall (fire or both), and the false-alarm rate on
 the `neither` class. Per run: equal-weight macro and sample-weighted averages of accuracy (2.7). Per group: mean
 and standard deviation over seeds (2.6). Bootstrap 95% CIs for every run's domain, macro and weighted accuracy.
-McNemar (exact, two-sided) for student vs in-domain teacher, kd_routed vs kd_uniform and kd_uniform vs nokd,
-per seed on identical images. The TensorRT-vs-PyTorch delta (2.8) is the difference between a group and its
-`..._trt_fp16` / `..._trt_int8` twin and is printed in summary.md.
+McNemar (exact, two-sided) for student vs in-domain teacher, kd_routed vs kd_uniform, and kd_routed/kd_uniform vs
+nokd_noamp (the no-AMP no-KD baseline; the original AMP `nokd` is kept for the record but is not compared), per
+seed on identical images. The kd_routed/kd_uniform vs nokd_noamp family gets Holm-corrected p-values
+(`p_value_holm`) since those are the tests used for the thesis's KD-vs-no-KD claim. The TensorRT-vs-PyTorch delta
+(2.8) is the difference between a group and its `..._trt_fp16` / `..._trt_int8` twin and is printed in summary.md.
 """
 from __future__ import annotations
 
@@ -32,9 +34,11 @@ DOMAINS = ["cv", "uav", "rs"]  # column order of the thesis table
 CLASSES = ["fire", "smoke", "both", "neither"]
 TABLE_ROWS = [  # (group, label) -> rows of tab:results-summary; "teacher_ensemble" is built from the three teachers
     ("teacher_ensemble", "Teachers (domain-matched)"),
-    ("kd_uniform", "Student, KD (uniform aggregation)"),
-    ("kd_routed", "Student, KD (domain-routed)"),
-    ("nokd", "Student, no KD (hard labels only)"),
+    # Students are deployed/evaluated as TensorRT engines only (no bare PyTorch-checkpoint dump
+    # exists for this dataset), so the headline table reads the *_trt_fp16 groups directly.
+    ("kd_uniform_trt_fp16", "Student, KD (uniform aggregation)"),
+    ("kd_routed_trt_fp16", "Student, KD (domain-routed)"),
+    ("nokd_noamp_trt_fp16", "Student, no KD (hard labels only)"),
 ]
 
 
@@ -46,12 +50,15 @@ def split_name(name: str) -> tuple[str, int | None]:
 
 
 def load_run(path: Path) -> dict[str, dict]:
+    """Sorts by image name so runs dumped in different orders (different pipeline versions,
+    different machines) are still comparable image-for-image."""
     domains = {}
     for domain in DOMAINS:
         file = path / f"{domain}.npz"
         if file.exists():
             data = np.load(file, allow_pickle=False)
-            domains[domain] = {"logits": data["logits"], "labels": data["labels"], "names": data["names"]}
+            order = np.argsort(data["names"], kind="stable")
+            domains[domain] = {"logits": data["logits"][order], "labels": data["labels"][order], "names": data["names"][order]}
     return domains
 
 
@@ -117,6 +124,18 @@ def mcnemar_exact(a_correct: np.ndarray, b_correct: np.ndarray) -> dict:
     log_half_n = n * math.log(0.5)
     terms = [math.exp(math.lgamma(n + 1) - math.lgamma(i + 1) - math.lgamma(n - i + 1) + log_half_n) for i in range(k + 1)]
     return {"only_a_correct": only_a, "only_b_correct": only_b, "p_value": float(min(1.0, 2.0 * math.fsum(terms)))}
+
+
+def holm_adjust(pvalues: list[float]) -> list[float]:
+    """Holm step-down correction for one family of hypotheses, in the input order."""
+    m = len(pvalues)
+    order = sorted(range(m), key=lambda i: pvalues[i])
+    adjusted = [0.0] * m
+    running_max = 0.0
+    for rank, idx in enumerate(order):
+        running_max = max(running_max, min(1.0, (m - rank) * pvalues[idx]))
+        adjusted[idx] = running_max
+    return adjusted
 
 
 def evaluate_run(domains: dict[str, dict], resamples: int) -> dict:
@@ -233,11 +252,20 @@ def main() -> None:
             if other["seed"] == r["seed"]:
                 for d in DOMAINS:
                     add_test("kd_routed vs kd_uniform", r["name"], other["name"], d, d, r["seed"])
-    for r in groups.get("kd_uniform", []):
-        for other in groups.get("nokd", []):
-            if other["seed"] == r["seed"]:
-                for d in DOMAINS:
-                    add_test("kd_uniform vs nokd", r["name"], other["name"], d, d, r["seed"])
+    # Students here are only deployed as TensorRT engines (no bare PyTorch-checkpoint dump exists
+    # for this dataset), so the KD-vs-no-KD family is evaluated on the *_trt_fp16 twins directly.
+    kd_vs_nokd_start = len(mcnemar)
+    for kd_group, label in (("kd_routed_trt_fp16", "kd_routed vs nokd_noamp"), ("kd_uniform_trt_fp16", "kd_uniform vs nokd_noamp")):
+        for r in groups.get(kd_group, []):
+            for other in groups.get("nokd_noamp_trt_fp16", []):
+                if other["seed"] == r["seed"]:
+                    for d in DOMAINS:
+                        add_test(label, r["name"], other["name"], d, d, r["seed"])
+    kd_vs_nokd_tests = mcnemar[kd_vs_nokd_start:]
+    if kd_vs_nokd_tests:
+        holm_pvalues = holm_adjust([t["p_value"] for t in kd_vs_nokd_tests])
+        for test, holm_p in zip(kd_vs_nokd_tests, holm_pvalues):
+            test["p_value_holm"] = holm_p
 
     deltas = []
     for g in summaries:
@@ -261,8 +289,13 @@ def main() -> None:
     if deltas:
         lines += ["", "## Deployed runtime vs PyTorch (macro accuracy delta, percentage points)", ""]
         lines += [f"- {d['twin']} vs {d['base']}: {d['macro_accuracy_delta_pp']:+.3f}" for d in deltas]
-    lines += ["", "## McNemar (exact, two-sided)", "", "| comparison | seed | domain | only A correct | only B correct | p |", "|---|---|---|---|---|---|"]
-    lines += [f"| {m['comparison']} | {m['seed']} | {m['domain']} | {m['only_a_correct']} | {m['only_b_correct']} | {m['p_value']:.4g} |" for m in mcnemar]
+    lines += ["", "## McNemar (exact, two-sided)", "",
+              "| comparison | seed | domain | only A correct | only B correct | p | p (Holm) |",
+              "|---|---|---|---|---|---|---|"]
+    lines += [f"| {m['comparison']} | {m['seed']} | {m['domain']} | {m['only_a_correct']} | {m['only_b_correct']} | "
+              f"{m['p_value']:.4g} | {m['p_value_holm']:.4g} |" if "p_value_holm" in m else
+              f"| {m['comparison']} | {m['seed']} | {m['domain']} | {m['only_a_correct']} | {m['only_b_correct']} | "
+              f"{m['p_value']:.4g} | -- |" for m in mcnemar]
     (args.out_dir / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     tex = []
