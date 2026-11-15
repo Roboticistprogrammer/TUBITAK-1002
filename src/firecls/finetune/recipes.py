@@ -43,6 +43,8 @@ ORIGINAL = {
     "teacher": Recipe(3e-5, 0.01, "constant", 0, None, True, 8, False),
     "kd": Recipe(3e-5, 0.01, "constant", 0, 1.0, False, 8, False),
     "nokd": Recipe(3e-5, 0.01, "constant", 0, 1.0, True, 8, True),
+    # the no-KD student retrained without AMP so it matches the KD students (FP32); identical to "nokd" otherwise
+    "nokd_noamp": Recipe(3e-5, 0.01, "constant", 0, 1.0, False, 8, True),
     "cnn": Recipe(3e-4, 0.05, "cosine", 1, 1.0, True, 16, True),
 }
 
@@ -51,6 +53,7 @@ KINDS = {  # CLI kind -> (recipe key, is a SwinV2 checkpoint, trained on all thr
     "kd_routed": ("kd", True, True, "kd"),
     "kd_uniform": ("kd", True, True, "kd"),
     "nokd": ("nokd", True, True, "ce"),
+    "nokd_noamp": ("nokd_noamp", True, True, "ce"),
     "mobilenet_v3_large": ("cnn", False, True, "ce"),
     "resnet50": ("cnn", False, True, "ce"),
 }
