@@ -35,15 +35,15 @@ MODELS = [
     ("resnet50_seed42", "resnet50", "ResNet-50", "resnet", 23.5),
     ("kd_routed_seed42", "swinv2-b-students", "SwinV2-B KD routed", "swin", 86.9),
     ("kd_uniform_seed42", "swinv2-b-students", "SwinV2-B KD uniform", "swin", 86.9),
-    ("nokd_seed42", "swinv2-b-students", "SwinV2-B no KD", "swin", 86.9),
+    ("nokd_noamp_seed42", "swinv2-b-students", "SwinV2-B no KD", "swin", 86.9),
 ]
-SHORT = {"kd_routed_seed42": "KD routed", "kd_uniform_seed42": "KD uniform", "nokd_seed42": "no KD",
+SHORT = {"kd_routed_seed42": "KD routed", "kd_uniform_seed42": "KD uniform", "nokd_noamp_seed42": "no KD",
          "mobilenet_v3_large_seed42": "MobileNetV3-L", "resnet50_seed42": "ResNet-50"}
 # Validated categorical palette (light surface); slots 1-3 validate for all-pairs scatter.
 FAMILY_COLOR = {"mobilenet": "#2a78d6", "resnet": "#eb6834", "swin": "#1baf7a"}
 FAMILY_LABEL = {"mobilenet": "MobileNetV3-Large (4.2M)", "resnet": "ResNet-50 (23.5M)", "swin": "SwinV2-B students (86.9M)"}
 MARKER = {"mobilenet_v3_large_seed42": "o", "resnet50_seed42": "o", "kd_routed_seed42": "o",
-          "kd_uniform_seed42": "s", "nokd_seed42": "^"}
+          "kd_uniform_seed42": "s", "nokd_noamp_seed42": "^"}
 RUNTIMES = [("ort_cpu", "ORT CPU", "#2a78d6"), ("ort_cuda", "ORT CUDA", "#eb6834"), ("trt_fp16", "TensorRT FP16", "#1baf7a")]
 INK, INK2, MUTED, GRID, AXIS = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
 
@@ -123,19 +123,19 @@ def family_legend(fig, y=0.97, shapes=False):
                for f in ("mobilenet", "resnet")]
     if shapes:
         handles += [plt.Line2D([], [], marker=MARKER[k], color=FAMILY_COLOR["swin"], markersize=7, label=f"SwinV2-B {SHORT[k]} (86.9M)", **kw)
-                    for k in ("kd_routed_seed42", "kd_uniform_seed42", "nokd_seed42")]
+                    for k in ("kd_routed_seed42", "kd_uniform_seed42", "nokd_noamp_seed42")]
     else:
         handles.append(plt.Line2D([], [], marker="o", color=FAMILY_COLOR["swin"], markersize=7, label=FAMILY_LABEL["swin"], **kw))
     fig.legend(handles=handles, loc="upper center", ncol=3, bbox_to_anchor=(0.5, y), columnspacing=2.4)
 
 
 OFFSET = {  # label offsets (points) so the three near-identical SwinV2 variants do not collide
-    "kd_routed_seed42": (7, 6), "kd_uniform_seed42": (8, 5), "nokd_seed42": (8, -8),
+    "kd_routed_seed42": (7, 6), "kd_uniform_seed42": (8, 5), "nokd_noamp_seed42": (8, -8),
     "mobilenet_v3_large_seed42": (7, 5), "resnet50_seed42": (7, 5),
 }
 
 
-XJIT = {"kd_routed_seed42": 0.93, "kd_uniform_seed42": 1.0, "nokd_seed42": 1.075}  # fig2 only: separates the 3 variants
+XJIT = {"kd_routed_seed42": 0.93, "kd_uniform_seed42": 1.0, "nokd_noamp_seed42": 1.075}  # fig2 only: separates the 3 variants
 
 
 def scatter_points(ax, rows, xfun, yfun, yerr=None, labels=True, jitter=False):
